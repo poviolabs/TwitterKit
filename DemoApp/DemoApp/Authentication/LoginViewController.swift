@@ -120,11 +120,11 @@ class LoginViewController: UIViewController {
 
     // MARK: - Actions
 
-    func backgroundTap() {
+    @objc func backgroundTap() {
         dismiss(animated: true, completion: nil)
     }
 
-    func login() {
+    @objc func login() {
         TWTRTwitter.sharedInstance().logIn(with: self) { (session, error) in
             if let session = session {
                 self.dismiss(animated: true) {
@@ -136,7 +136,7 @@ class LoginViewController: UIViewController {
         }
     }
 
-    func clearAccounts() {
+    @objc func clearAccounts() {
         for session in TWTRTwitter.sharedInstance().sessionStore.existingUserSessions() {
             if let session = session as? TWTRSession {
                 TWTRTwitter.sharedInstance().sessionStore.logOutUserID(session.userID)
@@ -200,7 +200,7 @@ class LoginViewController: UIViewController {
     private func setupTitleLabel() {
         titleLabel.topAnchor.constraint(equalTo: loginView.topAnchor, constant: 10.0).isActive = true
         titleLabel.centerXAnchor.constraint(equalTo: loginView.centerXAnchor).isActive = true
-        titleLabel.heightAnchor.constraint(equalToConstant: 30.0)
-        titleLabel.widthAnchor.constraint(equalToConstant: 100.0)
+        titleLabel.heightAnchor.constraint(equalToConstant: 30.0).isActive = true
+        titleLabel.widthAnchor.constraint(equalToConstant: 100.0).isActive = true
     }
 }
