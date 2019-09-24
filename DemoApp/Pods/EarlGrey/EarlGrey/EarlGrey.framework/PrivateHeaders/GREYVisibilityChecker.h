@@ -22,6 +22,8 @@
  */
 extern const NSUInteger kMinimumPointsVisibleForInteraction;
 
+NS_ASSUME_NONNULL_BEGIN
+
 #pragma mark - GREYVisibilityDiffBuffer
 
 /**
@@ -58,7 +60,7 @@ void GREYVisibilityDiffBufferRelease(GREYVisibilityDiffBuffer buffer);
  *  @param x      The x coordinate of the search point.
  *  @param y      The y coordinate of the search point.
  */
-BOOL GREYVisibilityDiffBufferIsVisibleAt(GREYVisibilityDiffBuffer buffer, size_t x, size_t y);
+BOOL GREYVisibilityDiffBufferIsVisible(GREYVisibilityDiffBuffer buffer, size_t x, size_t y);
 
 /**
  *  Changes the visibility value for the {@c x, @c y} position. If @c isVisible is @c YES the point
@@ -70,12 +72,25 @@ BOOL GREYVisibilityDiffBufferIsVisibleAt(GREYVisibilityDiffBuffer buffer, size_t
  *  @param isVisible A boolean that indicates the new visibility status (@c YES for visible,
                      @c NO otherwise) for the target point.
  */
-void GREYVisibilityDiffBufferSetVisibilityAt(GREYVisibilityDiffBuffer buffer,
-                                             size_t x,
-                                             size_t y,
-                                             BOOL isVisible);
+void GREYVisibilityDiffBufferSetVisibility(GREYVisibilityDiffBuffer buffer,
+                                           size_t x,
+                                           size_t y,
+                                           BOOL isVisible);
 
 #pragma mark - GREYVisibilityChecker
+
+/**
+ *  Data structure to hold information about visible pixels.
+ */
+typedef struct GREYVisiblePixelData {
+  /** The number of visible pixels. */
+  NSUInteger visiblePixelCount;
+  /**
+   *  A default pixel that's visible.
+   *  If no pixel is visible -- i.e. the visiblePixelCount = 0, then this is set to CGPointNull.
+   */
+  CGPoint visiblePixel;
+} GREYVisiblePixelData;
 
 /**
  *  Checker for assessing the visibility of elements on screen as they appear to the user.
@@ -85,31 +100,53 @@ void GREYVisibilityDiffBufferSetVisibilityAt(GREYVisibilityDiffBuffer buffer,
 /**
  *  @return @c YES if no part of the @c element is visible to the user.
  */
-+ (BOOL)isNotVisible:(id)element;
++ (BOOL)isNotVisible:(_Nullable id)element;
 
 /**
  *  @return The percentage ([0,1] inclusive) of the area visible on the screen compared to @c
  *          element's accessibility frame.
  */
-+ (CGFloat)percentVisibleAreaOfElement:(id)element;
++ (CGFloat)percentVisibleAreaOfElement:(_Nullable id)element;
 
 /**
  *  @return @c YES if at least 10 (@c kMinimumPointsVisibleForInteraction) points are visible @b and
  *          the activation point of the given element is also visible, @c NO otherwise.
  */
-+ (BOOL)isVisibleForInteraction:(id)element;
++ (BOOL)isVisibleForInteraction:(_Nullable id)element;
 
 /**
  *  @return A visible point where a user can tap to interact with specified @c element, or
  *          @c GREYCGPointNull if there's no such point.
+ *  @remark The returned point is relative to @c element's bound.
  */
-+ (CGPoint)visibleInteractionPointForElement:(id)element;
++ (CGPoint)visibleInteractionPointForElement:(_Nullable id)element;
 
 /**
  *  @return The smallest rectangle enclosing the entire visible area of @c element in screen
  *          coordinates. If no part of the element is visible, CGRectZero will be returned. The
  *          returned rect is always in points.
  */
-+ (CGRect)rectEnclosingVisibleAreaOfElement:(id)element;
++ (CGRect)rectEnclosingVisibleAreaOfElement:(_Nullable id)element;
+
+/**
+ *   @return The last known original image used by the visibility checker.
+ *
+ *   @remark This is available only for internal testing purposes.
+ */
++ (UIImage *_Nullable)grey_lastActualBeforeImage;
+/**
+ *   @return The last known actual color shifted image used by visibility checker.
+ *
+ *   @remark This is available only for internal testing purposes.
+ */
++ (UIImage *_Nullable)grey_lastActualAfterImage;
+/**
+ *   @return The last known actual color shifted image used by visibility checker.
+ *
+ *   @remark This is available only for internal testing purposes.
+ */
++ (UIImage *_Nullable)grey_lastExpectedAfterImage;
 
 @end
+
+NS_ASSUME_NONNULL_END

@@ -16,7 +16,9 @@
 
 #import <Foundation/Foundation.h>
 
-#import <EarlGrey/GREYAnalyticsDelegate.h>
+@protocol GREYAnalyticsDelegate;
+
+NS_ASSUME_NONNULL_BEGIN
 
 /**
  *  Provides methods for tracking EarlGrey usage using Google Analytics.
@@ -29,7 +31,7 @@
  *                                          forConfigKey:kGREYConfigKeyAnalyticsEnabled];
  *          @endcode
  */
-@interface GREYAnalytics : NSObject<GREYAnalyticsDelegate>
+@interface GREYAnalytics : NSObject
 
 /**
  *  @return The singleton instance.
@@ -56,17 +58,18 @@
  *  Sends an Analytics Event hit based on protocol specified in:
  *  @see https://developers.google.com/analytics/devguides/collection/protocol/v1/devguide#event
  *
- *  @param trackingID  The tracking ID for the created Analytics Event payload.
- *  @param clientID    The client ID for the created Analytics Event payload.
- *  @param category    The category value to be used for the created Analytics Event payload.
- *  @param subCategory The sub-category value to be used for the created Analytics Event payload.
- *  @param valueOrNil  The value to be used for the created Analytics Event payload. The value
- *                     can be @c nil to indicate that value is not to be added to the payload.
+ *  @param trackingID The tracking ID under which to track this event.
+ *  @param clientID   The ID for the user sending this event.
+ *  @param category   The Event Category for the event hit.
+ *  @param action     The Event Action for the event hit.
+ *  @param value      The event value for the event hit.
  */
 + (void)sendEventHitWithTrackingID:(NSString *)trackingID
                           clientID:(NSString *)clientID
                           category:(NSString *)category
-                       subCategory:(NSString *)subCategory
-                             value:(NSNumber *)valueOrNil;
+                            action:(NSString *)action
+                             value:(NSString *)value;
 
 @end
+
+NS_ASSUME_NONNULL_END

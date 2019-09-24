@@ -16,6 +16,11 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
+/**
+ *  A utility to get the string representation of the UI hierarchy.
+ */
 @interface GREYElementHierarchy : NSObject
 
 /**
@@ -29,8 +34,8 @@
 + (NSString *)hierarchyStringForElement:(id)element;
 
 /**
- *  Similar to hierarchyStringFor: with additional parameters for providing annotations for printed
- *  views and returns a String as well. @c annotationDictionary is a dictionary of type
+ *  Similar to hierarchyStringForElement: with additional parameters for providing annotations
+ *  for printed views. @c annotationDictionary is a dictionary of type
  *  @code @{[NSValue valueWithNonretainedObject:id]:NSString} @endcode with UI elements that
  *  require special formatting i.e. special text to be appended to the description. For example,
  *  @code @{viewA : @"This is a special view"} @endcode or
@@ -43,10 +48,13 @@
  *  @return The UI hierarchy as a string.
  */
 + (NSString *)hierarchyStringForElement:(id)element
-               withAnnotationDictionary:(NSDictionary *)annotationDictionary;
+               withAnnotationDictionary:(NSDictionary *_Nullable)annotationDictionary;
 
 /**
  *  Returns the UI hierarchy for all @c UIWindows provided by the GREYUIWindowProvider.
  */
 + (NSString *)hierarchyStringForAllUIWindows;
+
 @end
+
+NS_ASSUME_NONNULL_END

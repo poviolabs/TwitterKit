@@ -16,8 +16,11 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
- *  Provides ability to type strings using the iOS system keyboard.
+ *  Provides ability to perform input actions using the iOS system keyboard and also track the
+ *  current keyboard visibility.
  */
 @interface GREYKeyboard : NSObject
 
@@ -42,4 +45,11 @@
  */
 + (BOOL)waitForKeyboardToAppear;
 
+/**
+ *  @return @c YES if the keyboard is present on the screen, @c NO otherwise.
+ */
++ (BOOL)isKeyboardShown;
+
 @end
+
+NS_ASSUME_NONNULL_END

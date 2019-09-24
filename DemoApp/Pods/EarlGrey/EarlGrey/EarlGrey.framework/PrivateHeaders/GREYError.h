@@ -14,10 +14,13 @@
 // limitations under the License.
 //
 
-#import <EarlGrey/GREYDefines.h>
 #import <Foundation/Foundation.h>
 
+#import <EarlGrey/GREYDefines.h>
+
 @class GREYError;
+
+NS_ASSUME_NONNULL_BEGIN
 
 /**
  *  Creates a @c GREYError object with given @c domain, @c code, @c description
@@ -68,9 +71,8 @@ I_GREYErrorMake((domain), \
 /**
  *  If @c errorRef is not @c NULL, it is set to a @c GREYError object that is created with
  *  the given @c domain, @c code and @c description.
- *  The description is accessible by querying error's @c userInfo with
- *  @c NSLocalizedDescriptionKey.
- *  If @c errorRef is @c NULL, the error information is logged to the console.
+ *  The description is accessible by querying error's @c userInfo with @c NSLocalizedDescriptionKey.
+ *  If @c errorRef is @c NULL, the error information is logged using NSLog.
  *
  *  @param[out] errorRef    A @c GREYError reference for retrieving the created
  *                          error object.
@@ -91,10 +93,9 @@ I_GREYErrorMake((domain), \
 
 /**
  *  If @c errorRef is not @c NULL, it is set to a @c GREYError object that is created with
- *  the given @c domain, @c code, @c description and @c note.
- *  The description is accessible by querying error's @c userInfo with
- *  @c NSLocalizedDescriptionKey.
- *  If @c errorRef is @c NULL, the error information is logged to the console.
+ *  the given @c domain, @c code, @c description and @c glossary.
+ *  The description is accessible by querying error's @c userInfo with @c NSLocalizedDescriptionKey.
+ *  If @c errorRef is @c NULL, the error information is logged using NSLog.
  *
  *  @param[out] errorRef    A @c GREYError reference for retrieving the created
  *                          error object.
@@ -121,7 +122,7 @@ I_GREYErrorMake((domain), \
  *  The description is accessible by querying error's @c userInfo with
  *  @c NSLocalizedDescriptionKey. The @c nestedError is accessible by error's
  *  @c userInfo with @c NSUnderlyingErrorKey.
- *  If @c errorRef is @c NULL, the error information is logged to the console.
+ *  If @c errorRef is @c NULL, the error information is logged using NSLog.
  *
  *  @param[out] errorRef    A @c GREYError reference for retrieving the created
  *                          error object.
@@ -159,11 +160,11 @@ I_GREYErrorMake((domain), \
  */
 GREY_EXTERN GREYError *I_GREYErrorMake(NSString *domain,
                                        NSInteger code,
-                                       NSDictionary *userInfo,
+                                       NSDictionary *_Nullable userInfo,
                                        NSString *filePath,
                                        NSUInteger line,
                                        NSString *functionName,
-                                       NSDictionary *errorInfo,
+                                       NSDictionary *_Nullable errorInfo,
                                        NSArray *stackTrace);
 
 /**
@@ -326,3 +327,5 @@ GREY_EXTERN NSString *const kScreenshotActualAfterImage;
 + (NSString *)grey_nestedDescriptionForError:(NSError *)error;
 
 @end
+
+NS_ASSUME_NONNULL_END

@@ -16,6 +16,11 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
+/**
+ *  A protocol for providing arbitrary data as an enumeration.
+ */
 @protocol GREYProvider<NSObject>
 
 /**
@@ -24,3 +29,5 @@
 - (NSEnumerator *)dataEnumerator;
 
 @end
+
+NS_ASSUME_NONNULL_END

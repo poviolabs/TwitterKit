@@ -17,7 +17,7 @@ id<GREYMatcher> matcher(NSString *name, Class class)
 
 id<GREYMatcher> cellMatcher(NSString *name)
 {
-    id<GREYMatcher> matcher = grey_allOf(grey_accessibilityLabel(name), nil);
+    id<GREYMatcher> matcher = grey_allOf(grey_accessibilityLabel(name), grey_sufficientlyVisible(), nil);
     return matcher;
 }
 

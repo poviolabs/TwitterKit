@@ -21,8 +21,11 @@
  *  testing purposes.
  */
 
+#import "Common/GREYError.h"
+
 @class XCTestCase;
 
+NS_ASSUME_NONNULL_BEGIN
 
 /**
  *  Key used to retrieve the error test case class name from an error object dictionary.
@@ -114,3 +117,4 @@ GREY_EXTERN NSString *const kErrorDescriptionGlossaryKey;
 
 @end
 
+NS_ASSUME_NONNULL_END

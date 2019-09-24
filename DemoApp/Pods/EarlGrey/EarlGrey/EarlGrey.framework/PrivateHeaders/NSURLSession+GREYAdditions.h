@@ -1,5 +1,5 @@
 //
-// Copyright 2016 Google Inc.
+// Copyright 2017 Google Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,19 +14,11 @@
 // limitations under the License.
 //
 
-/**
- *  @file XCTestCase+GREYAdditions+Internal.h
- *  @brief Exposes XCTestCase+GREYAdditions' interfaces and methods that are otherwise private for
- *  testing purposes.
- */
-
-@interface XCTestCase (Internal)
+#import <Foundation/Foundation.h>
 
 /**
- *  Sets the object-association value for the test status.
- *
- *  @param status The new object-association value for the test status.
+ *  Additions to NSURLSession to enable EarlGrey to synchronize with NSURLSessionTasks that execute
+ *  network requests.
  */
-- (void)grey_setStatus:(GREYXCTestCaseStatus)status;
-
+@interface NSURLSession (GREYAdditions)
 @end
