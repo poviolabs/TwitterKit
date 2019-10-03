@@ -92,7 +92,7 @@
     };
     [self.mobileSSO processRedirectURL:successURL];
 
-    [self waitForExpectations:@[token, secret] timeout:1.0];
+    [self waitForExpectations:@[token, secret] timeout:1.5];
 }
 
 #pragma mark - Test Source Application Verification

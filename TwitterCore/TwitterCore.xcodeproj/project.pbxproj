@@ -240,7 +240,6 @@
 		AAAAF73D1F9E5129002F1991 /* TWTRAuthConfigSessionsValidator_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = AAAAF73B1F9E510B002F1991 /* TWTRAuthConfigSessionsValidator_Private.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		AAAAF7491FA12F17002F1991 /* TWTRAuthConfigStore_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = AAAAF7481FA12F17002F1991 /* TWTRAuthConfigStore_Private.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		AAAAF74A1FA12F17002F1991 /* TWTRAuthConfigStore_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = AAAAF7481FA12F17002F1991 /* TWTRAuthConfigStore_Private.h */; };
-		AAEA30D0216FBC430027E9D3 /* OCMock.framework in CopyFiles */ = {isa = PBXBuildFile; fileRef = AAEA30CF216FBC430027E9D3 /* OCMock.framework */; };
 		BF318EB41ADF32990082353A /* TWTRMultiThreadUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 9D30C5A61ACE5EA000D0B1FA /* TWTRMultiThreadUtil.m */; };
 		BF8EF2C81AFD3E9F008B4829 /* TWTRCoreOAuthSigning+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = BF8EF2C71AFD3E98008B4829 /* TWTRCoreOAuthSigning+Private.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		BF8EF2C91AFD3E9F008B4829 /* TWTRCoreOAuthSigning+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = BF8EF2C71AFD3E98008B4829 /* TWTRCoreOAuthSigning+Private.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -318,7 +317,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 16;
 			files = (
-				AAEA30D0216FBC430027E9D3 /* OCMock.framework in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
