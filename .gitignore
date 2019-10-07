@@ -25,3 +25,5 @@ config.status
 Artifacts
 DemoApp/Config.xcconfig
 
+TwitterCore/Pod
+TwitterKit/Pod

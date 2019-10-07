@@ -371,6 +371,7 @@
 		7B154E6E19D33A5300B6B64C /* TWTRBezierPaths.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B154E6C19D33A5300B6B64C /* TWTRBezierPaths.m */; };
 		7B154E7219D34B4700B6B64C /* TWTRBirdView.m in Sources */ = {isa = PBXBuildFile; fileRef = 7B154E7019D34B4700B6B64C /* TWTRBirdView.m */; };
 		7B964455199BDF27002117B5 /* TWTRKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 7B964454199BDF27002117B5 /* TWTRKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		8645238B234B69790021E8CD /* ImageIO.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 86452388234B69790021E8CD /* ImageIO.framework */; };
 		8675315323323B170009AD79 /* TWTRSETweetMediaAttachmentView.h in Headers */ = {isa = PBXBuildFile; fileRef = 8675314D23323B090009AD79 /* TWTRSETweetMediaAttachmentView.h */; };
 		8675315423323B1A0009AD79 /* TWTRSETweetMediaAttachmentView.m in Sources */ = {isa = PBXBuildFile; fileRef = 8675315023323B090009AD79 /* TWTRSETweetMediaAttachmentView.m */; };
 		8675315923335E6F0009AD79 /* TWTRVideoUtility.h in Headers */ = {isa = PBXBuildFile; fileRef = 8675315523335E610009AD79 /* TWTRVideoUtility.h */; };
@@ -1099,6 +1100,7 @@
 		7B964454199BDF27002117B5 /* TWTRKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = TWTRKit.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		7B96448A199BE365002117B5 /* TwitterKitResources.bundle */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.plug-in"; path = TwitterKitResources.bundle; sourceTree = "<group>"; };
 		7BEB12C119AFCBC400A86786 /* TwitterKit-module.modulemap */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = "TwitterKit-module.modulemap"; sourceTree = "<group>"; };
+		86452388234B69790021E8CD /* ImageIO.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ImageIO.framework; path = System/Library/Frameworks/ImageIO.framework; sourceTree = SDKROOT; };
 		8675314D23323B090009AD79 /* TWTRSETweetMediaAttachmentView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TWTRSETweetMediaAttachmentView.h; sourceTree = "<group>"; };
 		8675315023323B090009AD79 /* TWTRSETweetMediaAttachmentView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TWTRSETweetMediaAttachmentView.m; sourceTree = "<group>"; };
 		8675315523335E610009AD79 /* TWTRVideoUtility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TWTRVideoUtility.h; sourceTree = "<group>"; };
@@ -1398,6 +1400,7 @@
 			files = (
 				AA3E099220119CC000792255 /* MobileCoreServices.framework in Frameworks */,
 				AAF0C9F220119C2C0057F438 /* MapKit.framework in Frameworks */,
+				8645238B234B69790021E8CD /* ImageIO.framework in Frameworks */,
 				AAF0C9F120119C0A0057F438 /* CoreLocation.framework in Frameworks */,
 				37ED04661CE3E81C003DC129 /* SafariServices.framework in Frameworks */,
 				DB2242801C3F24AF008A6DC7 /* Security.framework in Frameworks */,
@@ -1422,6 +1425,7 @@
 		208ACAB41FB2800900008F42 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				86452388234B69790021E8CD /* ImageIO.framework */,
 				AA3E099B20125EC600792255 /* MapKit.framework */,
 				AA3E099120119CA500792255 /* MobileCoreServices.framework */,
 				AAF0C9F020119BED0057F438 /* MapKit.framework */,

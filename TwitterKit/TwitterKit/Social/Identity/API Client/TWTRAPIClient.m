@@ -335,8 +335,8 @@ static id<TWTRSessionStore_Private> TWTRSharedSessionStore = nil;
 
     dispatch_semaphore_t uploadSemaphore = dispatch_semaphore_create(0);
 
-    long long dataLength = data.length;
-    const long long kChunkSize = 5 * 1024 * 1024;
+    NSUInteger dataLength = data.length;
+    const NSUInteger kChunkSize = 5 * 1024 * 1024;
     NSUInteger offset = 0;
     NSUInteger segmentIndex = 0;
     do
