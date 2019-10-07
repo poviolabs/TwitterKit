@@ -22,6 +22,7 @@
 #import "TWTRSETweetAttachment.h"
 #import "TWTRSETweetAttachmentView.h"
 #import "TWTRSETweetURLAttachmentView.h"
+#import "TWTRImageLoaderImageUtils.h"
 
 @import MobileCoreServices;
 
@@ -275,7 +276,8 @@ static const CGFloat kSpinnerPadding = 15.0;
 
 - (void)updateWithImage:(UIImage *)image
 {
-    [self updateWithUnderlyingAttachment:[[TWTRSETweetAttachmentImage alloc] initWithImage:image]];
+    NSData *imageData = [TWTRImageLoaderImageUtils imageDataFromImage:image];
+    [self updateWithUnderlyingAttachment:[[TWTRSETweetAttachmentImage alloc] initWithImageData:imageData]];
 }
 
 - (void)updateWithError:(NSError *)error

@@ -32,6 +32,8 @@
 #import "TWTRTwitterText.h"
 #import "TWTRTwitter_Private.h"
 #import "TWTRWordRange.h"
+#import "TWTRVideoUtility.h"
+#import "TWTRImageLoaderImageUtils.h"
 
 NSArray *existingAccounts()
 {
@@ -46,27 +48,17 @@ NSArray *existingAccounts()
     return accounts;
 }
 
-UIImage *videoThumbnail(NSURL *url)
-{
-    AVAsset *asset = [AVAsset assetWithURL:url];
-    AVAssetImageGenerator *generator = [[AVAssetImageGenerator alloc] initWithAsset:asset];
-    generator.appliesPreferredTrackTransform = YES;
-    CMTime time = CMTimeMake(1, 30);
-    NSError *thumbnailError;
-    CGImageRef thumbnailFrame = [generator copyCGImageAtTime:time actualTime:nil error:&thumbnailError];
-    if (!thumbnailFrame) {
-        NSLog(@"Could not retrieve thumbnail from video URL: %@", thumbnailError);
-    }
-    UIImage *thumbnail = [UIImage imageWithCGImage:thumbnailFrame];
-
-    return thumbnail;
-}
-
 @implementation TWTRSharedComposerWrapper
 
 #pragma mark - Initialization
 
 - (instancetype)initWithText:(NSString *)text image:(UIImage *)image attachment:(id<TWTRSETweetAttachment>)attachment
+{
+    NSArray *images = image ? @[[TWTRImageLoaderImageUtils imageDataFromImage:image]] : nil;
+    return [self initWithText:text images:images attachment:attachment];
+}
+
+- (instancetype)initWithText:(NSString *)text images:(NSArray<NSData *> *)images attachment:(id<TWTRSETweetAttachment>)attachment
 {
     self.networking = [[TWTRComposerNetworking alloc] init];
     self.networking.delegate = self;
@@ -76,7 +68,7 @@ UIImage *videoThumbnail(NSURL *url)
     if (accounts.count == 0) {
         NSLog(@"[TwitterKit] Error: Composer created without any user accounts set up. It is the responsibility of the developer to ensure that Twitter Kit has a logged-in user before presenting a composer. See https://dev.twitter.com/twitterkit/ios/compose-tweets#presenting-a-basic-composer");
     }
-    TWTRSETweet *tweet = [self tweetWithText:text attachment:attachment image:image];
+    TWTRSETweet *tweet = [self tweetWithText:text attachment:attachment images:images];
 
     // Shared Composer
     TWTRSETweetShareConfiguration *config = [[TWTRSETweetShareConfiguration alloc] initWithInitialTweet:tweet accounts:accounts initiallySelectedAccount:[accounts lastObject] geoTagging:nil autoCompletion:nil cardPreviewProvider:nil imageDownloader:[self imageLoader] localizedResources:[TWTRLocalizedResources class] networking:self.networking twitterText:[TWTRTwitterText class] wordRangeCalculator:[NSString class] delegate:self];
@@ -86,23 +78,33 @@ UIImage *videoThumbnail(NSURL *url)
     return self;
 }
 
-- (instancetype)initWithInitialText:(nullable NSString *)initialText image:(nullable UIImage *)image videoURL:(nullable NSURL *)videoURL
+- (instancetype)initWithInitialText:(nullable NSString *)initialText image:(nullable UIImage *)image videoURL:(nullable NSURL *)videoURL {
+    NSArray *images = image ? @[[TWTRImageLoaderImageUtils imageDataFromImage:image]] : nil;
+    return [self initWithInitialText:initialText images:images videoURL:videoURL];
+}
+
+- (instancetype)initWithInitialText:(nullable NSString *)initialText images:(nullable NSArray<NSData *> *)images videoURL:(nullable NSURL *)videoURL
 {
     if ([videoURL.scheme isEqualToString:@"assets-library"]) {
         NSLog(@"Incorrect video URL format was provided. Use key `UIImagePickerControllerMediaURL` from the `didFinishPickingMediaWithInfo:` info parameter.");
         return nil;
     }
 
-    if (videoURL && image) {
+    if (videoURL && images) {
         NSLog(@"Only one attachment type may be provided (image or video).");
         return nil;
     }
 
-    if (videoURL) {
-        image = videoThumbnail(videoURL);
+    if (videoURL && !(images.count > 0)) {
+        images = @[[TWTRVideoUtility videoThumbnailDataForURL:videoURL]];
     }
 
-    if (self = [self initWithText:initialText image:image attachment:nil]) {
+    id<TWTRSETweetAttachment> attachment = nil;
+    if (videoURL) {
+        attachment = [[TWTRSETweetAttachmentMedia alloc] initWithImages:images videoURL:videoURL];
+    }
+
+    if (self = [self initWithText:initialText images:images attachment:attachment]) {
         if (videoURL) {
             NSData *videoData = [NSData dataWithContentsOfURL:videoURL];
             // Must set this after [self init] is called
@@ -113,14 +115,19 @@ UIImage *videoThumbnail(NSURL *url)
     return self;
 }
 
-- (instancetype)initWithInitialText:(nullable NSString *)initialText image:(nullable UIImage *)image videoData:(nullable NSData *)videoData
+- (instancetype)initWithInitialText:(nullable NSString *)initialText image:(nullable UIImage *)image videoData:(nullable NSData *)videoData {
+    NSArray *images = image ? @[[TWTRImageLoaderImageUtils imageDataFromImage:image]] : nil;
+    return [self initWithInitialText:initialText images:images videoData:videoData];
+}
+
+- (instancetype)initWithInitialText:(nullable NSString *)initialText images:(nullable NSArray<NSData *> *)images videoData:(nullable NSData *)videoData
 {
-    if (videoData && !image) {
+    if (videoData && !(images.count > 0)) {
         NSLog(@"The video doesn't have a preview image to show in composer.");
         return nil;
     }
 
-    if (self = [self initWithText:initialText image:image attachment:nil]) {
+    if (self = [self initWithText:initialText images:images attachment:nil]) {
         if (videoData) {
             [self.networking prepareVideoData:videoData];
         }
@@ -137,17 +144,23 @@ UIImage *videoThumbnail(NSURL *url)
     return [TWTRTwitter sharedInstance].imageLoader ?: [[TWTRImageLoader alloc] initWithSession:[NSURLSession sharedSession] cache:nil taskManager:[[TWTRImageLoaderTaskManager alloc] init]];
 }
 
-- (TWTRSETweet *)tweetWithText:(NSString *)text attachment:(id<TWTRSETweetAttachment>)attachment image:(UIImage *)image
+- (TWTRSETweet *)tweetWithText:(NSString *)text attachment:(id<TWTRSETweetAttachment>)attachment images:(NSArray<NSData *> *)images
 {
-    id<TWTRSETweetAttachment> tweetAttachment = attachment ?: [self attachmentWithImage:image];
+    id<TWTRSETweetAttachment> tweetAttachment = attachment ?: [self attachmentWithImages:images];
 
     return [[TWTRSETweet alloc] initWithInReplyToTweetID:nil text:text attachment:tweetAttachment place:nil usernames:nil hashtags:nil];
 }
 
-- (TWTRSETweetAttachmentImage *)attachmentWithImage:(UIImage *)image
+- (id<TWTRSETweetAttachment>)attachmentWithImages:(NSArray<NSData *> *)images
 {
-    if (image) {
-        return [[TWTRSETweetAttachmentImage alloc] initWithImage:image];
+    if (images) {
+        if (images.count > 1) {
+            return [[TWTRSETweetAttachmentMedia alloc] initWithImages:images videoURL:nil];
+        } else if (images.count == 1) {
+            return [[TWTRSETweetAttachmentImage alloc] initWithImageData:images[0]];
+        } else {
+            return nil;
+        }
     } else {
         return nil;
     }

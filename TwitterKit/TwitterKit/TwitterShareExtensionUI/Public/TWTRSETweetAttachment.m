@@ -18,6 +18,7 @@
 #pragma mark imports
 
 #import "TWTRSETweetAttachment.h"
+#import "TWTRImageLoaderImageUtils.h"
 
 @import Foundation;
 @import MobileCoreServices.UTCoreTypes;
@@ -34,8 +35,41 @@ NSString *const TWTRSETweetShareExtensionErrorDomain = @"TWTRSETweetShareExtensi
 {
     NSParameterAssert(image);
 
+    NSData *imageData = [TWTRImageLoaderImageUtils imageDataFromImage:image];
+    return [self initWithImageData:imageData];
+}
+
+- (id)initWithImageData:(NSData *)imageData
+{
+    NSParameterAssert(imageData);
+
     if ((self = [super init])) {
-        _image = image;
+        _imageData = imageData;
+    }
+
+    return self;
+}
+
+- (NSString *)urlString
+{
+    return nil;
+}
+
+- (UIImage *)image {
+    return [UIImage imageWithData:_imageData];
+}
+
+@end
+
+@implementation TWTRSETweetAttachmentMedia
+
+- (instancetype)initWithImages:(nullable NSArray<NSData *> *)images videoURL:(nullable NSURL *)videoURL
+{
+    NSParameterAssert(images || videoURL);
+
+    if ((self = [super init])) {
+        _images = images;
+        _videoURL = videoURL;
     }
 
     return self;

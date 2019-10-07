@@ -63,6 +63,18 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithInitialText:(nullable NSString *)initialText image:(nullable UIImage *)image videoURL:(nullable NSURL *)videoURL;
 
 /**
+ *  Initialize a composer with pre-filled text and images or video attachment.
+ *  Requires a logged in Twitter user.
+ *
+ *  @param initialText (optional) Text with which to pre-fill the composer text.
+ *  @param images (optional) Images to add as an attachment.
+ *  @param videoURL (optional) Video URL to add as an attachment. Of the form of `assets-library`.
+ *
+ *  Note: Only one type of attachment (image or video) may be added.
+ */
+- (instancetype)initWithInitialText:(nullable NSString *)initialText images:(nullable NSArray<NSData *> *)images videoURL:(nullable NSURL *)videoURL;
+
+/**
  *  Initialize a composer with pre-filled text and an image or video attachment.
  *
  *  @param initialText (optional) Text with which to pre-fill the composer text.
@@ -72,6 +84,17 @@ NS_ASSUME_NONNULL_BEGIN
  *  Note: Preview image is required if videoData parameter is passed.
  */
 - (instancetype)initWithInitialText:(nullable NSString *)initialText image:(nullable UIImage *)image videoData:(nullable NSData *)videoData;
+
+/**
+ *  Initialize a composer with pre-filled text and images or video attachment.
+ *
+ *  @param initialText (optional) Text with which to pre-fill the composer text.
+ *  @param images (required) Images (or preview image) to add as an attachment.
+ *  @param videoData (optional) NSData for video asset to add as an attachment.
+ *
+ *  Note: Preview image is required if videoData parameter is passed.
+ */
+- (instancetype)initWithInitialText:(nullable NSString *)initialText images:(nullable NSArray<NSData *> *)images videoData:(nullable NSData *)videoData;
 
 - (instancetype)init NS_UNAVAILABLE;
 

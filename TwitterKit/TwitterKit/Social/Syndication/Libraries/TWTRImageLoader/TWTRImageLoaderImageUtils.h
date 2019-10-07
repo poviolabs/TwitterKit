@@ -46,6 +46,24 @@ NS_ASSUME_NONNULL_BEGIN
  */
 + (NSData *)imageDataFromImage:(UIImage *)image compressionQuality:(CGFloat)compressionQuality;
 
+/**
+ *  Extracts the underlying image data from the given image (compressionQuality = 1).
+ *
+ *  @param image              the image to extract data from. Supported formats: PNG/JPEG
+ *
+ *  @return underlying image data.
+ */
++ (NSData *)imageDataFromImage:(UIImage *)image;
+
+/**
+ *  Determines MIME type for the given image data.
+ *
+ *  @param data image data to check.
+ *
+ *  @return MIME type string
+ */
++ (NSString *)mimeTypeForImageData:(NSData *)data;
+
 @end
 
 NS_ASSUME_NONNULL_END

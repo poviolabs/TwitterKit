@@ -47,22 +47,35 @@
 #import "TWTRComposerViewController.h"
 #import <TwitterCore/TWTRAssertionMacros.h>
 #import "TWTRSharedComposerWrapper.h"
+#import "TWTRImageLoaderImageUtils.h"
 
 @implementation TWTRComposerViewController
 
 + (instancetype)emptyComposer
 {
-    return (TWTRComposerViewController *)[[TWTRSharedComposerWrapper alloc] initWithInitialText:nil image:nil videoURL:nil];
+    return (TWTRComposerViewController *)[[TWTRSharedComposerWrapper alloc] initWithInitialText:nil images:nil videoURL:nil];
 }
 
-- (instancetype)initWithInitialText:(nullable NSString *)initialText image:(nullable UIImage *)image videoURL:(nullable NSURL *)videoURL
+- (instancetype)initWithInitialText:(nullable NSString *)initialText image:(UIImage *)image videoURL:(nullable NSURL *)videoURL
 {
-    return (TWTRComposerViewController *)[[TWTRSharedComposerWrapper alloc] initWithInitialText:initialText image:image videoURL:videoURL];
+    NSArray *images = image ? @[[TWTRImageLoaderImageUtils imageDataFromImage:image]] : nil;
+    return (TWTRComposerViewController *)[[TWTRSharedComposerWrapper alloc] initWithInitialText:initialText images:images videoURL:videoURL];
 }
 
-- (instancetype)initWithInitialText:(nullable NSString *)initialText image:(nullable UIImage *)image videoData:(nullable NSData *)videoData
+- (instancetype)initWithInitialText:(nullable NSString *)initialText images:(nullable NSArray<NSData *> *)images videoURL:(nullable NSURL *)videoURL
 {
-    return (TWTRComposerViewController *)[[TWTRSharedComposerWrapper alloc] initWithInitialText:initialText image:image videoData:videoData];
+    return (TWTRComposerViewController *)[[TWTRSharedComposerWrapper alloc] initWithInitialText:initialText images:images videoURL:videoURL];
+}
+
+- (instancetype)initWithInitialText:(nullable NSString *)initialText image:(UIImage *)image videoData:(nullable NSData *)videoData
+{
+    NSArray *images = image ? @[[TWTRImageLoaderImageUtils imageDataFromImage:image]] : nil;
+    return (TWTRComposerViewController *)[[TWTRSharedComposerWrapper alloc] initWithInitialText:initialText images:images videoData:videoData];
+}
+
+- (instancetype)initWithInitialText:(nullable NSString *)initialText images:(nullable NSArray<NSData *> *)images videoData:(nullable NSData *)videoData
+{
+    return (TWTRComposerViewController *)[[TWTRSharedComposerWrapper alloc] initWithInitialText:initialText images:images videoData:videoData];
 }
 
 @end

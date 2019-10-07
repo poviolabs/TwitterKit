@@ -49,6 +49,8 @@
 #import "TWTRTwitter_Private.h"
 #import "TWTRURLSessionConfig.h"
 #import "TWTRUser.h"
+#import "TWTRImageLoaderImageUtils.h"
+#import "TWTRMediaMIMEType.h"
 
 NSString *const TWTRTweetsNotLoadedKey = @"TweetsNotLoaded";
 static NSString *const TWTRAPIConstantsCreateTweetPath = @"/1.1/statuses/update.json";
@@ -172,23 +174,108 @@ static id<TWTRSessionStore_Private> TWTRSharedSessionStore = nil;
              }];
 }
 
-- (void)sendTweetWithText:(NSString *)tweetText image:(UIImage *)image completion:(TWTRSendTweetCompletion)completion
+- (void)sendTweetWithText:(NSString *)tweetText image:(UIImage *)image completion:(TWTRSendTweetCompletion)completion {
+    NSArray *images = image ? @[[TWTRImageLoaderImageUtils imageDataFromImage:image]] : nil;
+    [self sendTweetWithText:tweetText images:images completion:completion];
+}
+
+- (void)sendTweetWithText:(NSString *)tweetText images:(NSArray<NSData *> *)images completion:(TWTRSendTweetCompletion)completion
 {
-    TWTRParameterAssertOrReturn(image);
+    TWTRParameterAssertOrReturn(images);
     TWTRParameterAssertOrReturn(tweetText);
     TWTRParameterAssertOrReturn(completion);
 
-    NSData *media = UIImageJPEGRepresentation(image, 0.9);
-    [self uploadMedia:media
-          contentType:@"image/jpeg"
-           completion:^(NSString *mediaID, NSError *mediaError) {
-               if (mediaID) {
-                   [self sendTweetWithText:tweetText mediaID:mediaID completion:completion];
-               } else {
-                   completion(nil, mediaError);
-               }
-           }];
+    // Keep the limit to qualify for image upload
+    const long long kImageMaxFileSize = 15 * 1024 * 1024;
+    const long long kGIFMaxFileSize = 15 * 1024 * 1024;
+
+    dispatch_semaphore_t uploadSemaphore = dispatch_semaphore_create(0);
+    __block NSError *imageUploadError = nil;
+    __block NSString *uploadedMediaID = nil;
+    NSMutableArray *uploadedMediaIDs = [NSMutableArray arrayWithCapacity:images.count];
+
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        for (NSData *imageData in images) {
+            NSString *mimeType = [TWTRImageLoaderImageUtils mimeTypeForImageData:imageData];
+            if (mimeType == nil) {
+                continue;
+            }
+
+            long long imageMaxFileSize = [mimeType isEqualToString:TWTRTweetMediaMIMEContentTypeGIF] ? kGIFMaxFileSize : kImageMaxFileSize;
+            if (imageData == nil) {
+                NSLog(@"Error: image data is empty");
+                [self sendTweetWithText:tweetText completion:completion];
+                return;
+            } else if (imageData.length == 0) {
+                NSLog(@"Error: image data is too small");
+                NSError *sizeError = [NSError errorWithDomain:TWTRErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey: @"Error: image data is too small"}];
+                completion(nil, sizeError);
+                return;
+            } else if (imageData.length > imageMaxFileSize) {
+                NSLog(@"Error: image data is too big");
+                NSError *sizeError = [NSError errorWithDomain:TWTRErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey: @"Error: image data is bigger than 5 MB"}];
+                completion(nil, sizeError);
+                return;
+            }
+
+            dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+                [self uploadFileWithData:imageData contentType:mimeType completion:^(NSString *mediaID, NSError *error) {
+                    uploadedMediaID = mediaID;
+                    imageUploadError = error;
+                    dispatch_semaphore_signal(uploadSemaphore);
+                }];
+            });
+
+            dispatch_semaphore_wait(uploadSemaphore, DISPATCH_TIME_FOREVER);
+            if (imageUploadError) {
+                completion(nil, imageUploadError);
+            } else {
+                [uploadedMediaIDs addObject:uploadedMediaID];
+            }
+        }
+
+        if (uploadedMediaIDs.count == 0) {
+            NSLog(@"Error: no images to upload");
+            NSError *sizeError = [NSError errorWithDomain:TWTRErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey: @"Error: no images to upload"}];
+            completion(nil, sizeError);
+            return;
+        }
+        NSString *mediaIDs = [uploadedMediaIDs componentsJoinedByString:@","];
+        [self sendTweetWithText:tweetText mediaID:mediaIDs completion:completion];
+    });
 }
+
+- (void)sendTweetWithText:(NSString *)tweetText videoData:(NSData *)videoData completion:(TWTRSendTweetCompletion)completion
+{
+    // Keep the limit to qualify for video upload
+    const long long kVideoMaxFileSize = 512 * 1024 * 1024;
+
+    if (videoData == nil) {
+        NSLog(@"Error: video data is empty");
+        [self sendTweetWithText:tweetText completion:completion];
+        return;
+    } else if (videoData.length == 0) {
+        NSLog(@"Error: video data is too small");
+        NSError *sizeError = [NSError errorWithDomain:TWTRErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey: @"Error: video data is too small"}];
+        completion(nil, sizeError);
+        return;
+    } else if (videoData.length > kVideoMaxFileSize) {
+        NSLog(@"Error: video data is too big");
+        NSError *sizeError = [NSError errorWithDomain:TWTRErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey: @"Error: video data is bigger than 512 MB"}];
+        completion(nil, sizeError);
+        return;
+    }
+
+    [self uploadFileWithData:videoData contentType:TWTRTweetMediaMIMEContentTypeMP4 completion:^(NSString *mediaID, NSError *error) {
+        if (error) {
+            completion(nil, error);
+        } else {
+            [self sendTweetWithText:tweetText mediaID:mediaID completion:completion];
+        }
+    }];
+}
+
+#pragma mark Tweet cycle begin
 
 - (void)sendTweetWithText:(NSString *)tweetText mediaID:(NSString *)mediaID completion:(TWTRSendTweetCompletion)completion
 {
@@ -200,7 +287,6 @@ static id<TWTRSessionStore_Private> TWTRSharedSessionStore = nil;
     [self postToAPIPath:TWTRAPIConstantsCreateTweetPath
              parameters:parameters
              completion:^(NSURLResponse *response, NSDictionary *responseDict, NSError *error) {
-
                  TWTRTweet *tweet = nil;
                  if (!error) {
                      tweet = [[TWTRTweet alloc] initWithJSONDictionary:responseDict];
@@ -209,14 +295,18 @@ static id<TWTRSessionStore_Private> TWTRSharedSessionStore = nil;
              }];
 }
 
-- (void)uploadVideoWithVideoData:(NSData *)videoData completion:(TWTRMediaUploadResponseCompletion)completion
+- (void)uploadFileWithData:(NSData *)data contentType:(NSString *)contentType completion:(TWTRMediaUploadResponseCompletion)completion
 {
-    TWTRParameterAssertOrReturn(videoData);
+    TWTRParameterAssertOrReturn(data);
     TWTRParameterAssertOrReturn(completion);
 
-    NSString *videoSize = @(videoData.length).stringValue;
-    NSString *videoString = [videoData base64EncodedStringWithOptions:0];
-    NSDictionary *parameters = @{@"command": @"INIT", @"total_bytes": videoSize, @"media_type": @"video/mp4"};
+    NSString *dataSize = @(data.length).stringValue;
+    NSDictionary *parameters;
+    if ([contentType isEqualToString:TWTRTweetMediaMIMEContentTypeGIF]) {
+        parameters = @{@"command": @"INIT", @"total_bytes": dataSize, @"media_type": contentType, @"media_category": @"tweet_gif"};
+    } else {
+        parameters = @{@"command": @"INIT", @"total_bytes": dataSize, @"media_type": contentType};
+    }
 
     [self uploadWithParameters:parameters
                     completion:^(NSURLResponse *response, NSDictionary *responseDict, NSError *error) {
@@ -224,7 +314,7 @@ static id<TWTRSessionStore_Private> TWTRSharedSessionStore = nil;
                             completion(nil, error);
                         } else {
                             if ([responseDict objectForKey:TWTRMediaIDStringKey]) {
-                                [self postAppendWithMediaID:responseDict[TWTRMediaIDStringKey] videoString:videoString completion:completion];
+                                [self postAppendWithMediaID:responseDict[TWTRMediaIDStringKey] data:data completion:completion];
                             } else {
                                 NSError *missingKeyError = [NSError errorWithDomain:TWTRErrorDomain code:TWTRErrorCodeMissingParameter userInfo:@{NSLocalizedDescriptionKey: @"API returned dictionary but did not have \"media_id_string\""}];
                                 completion(nil, missingKeyError);
@@ -233,22 +323,46 @@ static id<TWTRSessionStore_Private> TWTRSharedSessionStore = nil;
                     }];
 }
 
-- (void)postAppendWithMediaID:(nonnull NSString *)mediaID videoString:(nonnull NSString *)videoString completion:(TWTRMediaUploadResponseCompletion)completion
+- (void)postAppendWithMediaID:(nonnull NSString *)mediaID data:(nonnull NSData *)data completion:(TWTRMediaUploadResponseCompletion)completion
 {
     if (!mediaID) {
         NSError *error = [NSError errorWithDomain:TWTRErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey: @"Error: mediaID is required."}];
         completion(nil, error);
         return;
     }
-    NSDictionary *parameters = @{@"command": @"APPEND", @"media_id": mediaID, @"segment_index": @"0", @"media": videoString};
-    [self uploadWithParameters:parameters
-                    completion:^(NSURLResponse *response, id responseObject, NSError *error) {
-                        if (error) {
-                            completion(nil, error);
-                        } else {
-                            [self postFinalizeWithMediaID:mediaID completion:completion];
-                        }
-                    }];
+
+    __block NSError *chunkUploadError = nil;
+
+    dispatch_semaphore_t uploadSemaphore = dispatch_semaphore_create(0);
+
+    long long dataLength = data.length;
+    const long long kChunkSize = 5 * 1024 * 1024;
+    NSUInteger offset = 0;
+    NSUInteger segmentIndex = 0;
+    do
+    {
+        NSUInteger thisChunkSize = dataLength - offset > kChunkSize ? kChunkSize : dataLength - offset;
+        NSData *chunk = [NSData dataWithBytesNoCopy:(char *)data.bytes + offset length:thisChunkSize freeWhenDone:NO];
+
+        NSString *chunkString = [chunk base64EncodedStringWithOptions:0];
+        NSDictionary *parameters = @{@"command": @"APPEND", @"media_id": mediaID, @"segment_index": [NSString stringWithFormat:@"%zd", segmentIndex], @"media_data": chunkString};
+
+        offset += thisChunkSize;
+        segmentIndex++;
+
+        [self uploadWithParameters:parameters
+                        completion:^(NSURLResponse *response, id responseObject, NSError *error) {
+            chunkUploadError = error;
+            dispatch_semaphore_signal(uploadSemaphore);
+        }];
+
+        dispatch_semaphore_wait(uploadSemaphore, DISPATCH_TIME_FOREVER);
+        if (chunkUploadError) {
+            completion(nil, chunkUploadError);
+        }
+    } while (offset < dataLength);
+
+    [self postFinalizeWithMediaID:mediaID completion:completion];
 }
 
 - (void)postFinalizeWithMediaID:(nonnull NSString *)mediaID completion:(TWTRMediaUploadResponseCompletion)completion
@@ -263,36 +377,8 @@ static id<TWTRSessionStore_Private> TWTRSharedSessionStore = nil;
                         }
                     }];
 }
-- (void)sendTweetWithText:(NSString *)tweetText videoData:(NSData *)videoData completion:(TWTRSendTweetCompletion)completion
-{
-    // Keep the limit to be 5M to qualify for image/media upload, not using separate chunk upload
-    const long long kVideoMaxFileSize = 5 * 1024 * 1024;
 
-    if (videoData == nil) {
-        NSLog(@"Error: video data is empty");
-        [self sendTweetWithText:tweetText completion:completion];
-        return;
-    } else if (videoData.length == 0) {
-        NSLog(@"Error: video data is too small");
-        NSError *sizeError = [NSError errorWithDomain:TWTRErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey: @"Error: video data is too small"}];
-        completion(nil, sizeError);
-        return;
-    } else if (videoData.length > kVideoMaxFileSize) {
-        NSLog(@"Error: video data is too big");
-        NSError *sizeError = [NSError errorWithDomain:TWTRErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey: @"Error: video data is bigger than 5 MB"}];
-        completion(nil, sizeError);
-        return;
-    }
-
-    [self uploadVideoWithVideoData:videoData
-                        completion:^(NSString *mediaID, NSError *error) {
-                            if (error) {
-                                completion(nil, error);
-                            } else {
-                                [self sendTweetWithText:tweetText mediaID:mediaID completion:completion];
-                            }
-                        }];
-}
+#pragma mark Tweet cycle end
 
 - (void)loadUserWithID:(NSString *)userIDString completion:(TWTRLoadUserCompletion)completion
 {

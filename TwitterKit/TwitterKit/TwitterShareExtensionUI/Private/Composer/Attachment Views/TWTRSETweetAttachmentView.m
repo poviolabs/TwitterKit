@@ -20,6 +20,7 @@
 #import "TWTRSETweetCocoaItemProviderAttachmentView.h"
 #import "TWTRSETweetCustomCardAttachmentView.h"
 #import "TWTRSETweetImageAttachmentView.h"
+#import "TWTRSETweetMediaAttachmentView.h"
 #import "TWTRSETweetURLAttachmentView.h"
 #import "UIView+TSEExtensions.h"
 
@@ -48,6 +49,8 @@
     if ((self = [super initWithFrame:CGRectZero])) {
         if ([attachment isKindOfClass:[TWTRSETweetAttachmentImage class]]) {
             _attachmentView = [[TWTRSETweetImageAttachmentView alloc] initWithImageAttachment:attachment];
+        } else if ([attachment isKindOfClass:[TWTRSETweetAttachmentMedia class]]) {
+            _attachmentView = [[TWTRSETweetMediaAttachmentView alloc] initWithMediaAttachment:attachment];
         } else if ([attachment isKindOfClass:[TWTRSETweetAttachmentURL class]]) {
             _attachmentView = [[TWTRSETweetURLAttachmentView alloc] initWithURLAttachment:attachment];
             [self _tseui_establishBorder];
