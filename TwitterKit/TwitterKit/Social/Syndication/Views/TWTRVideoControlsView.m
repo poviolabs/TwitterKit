@@ -117,17 +117,22 @@ static const CGFloat TWTRControlsMinimumTappableSizeInPoints = 44.0;
 
 + (TWTRVideoControlsView *)inlineControls
 {
-    TWTRVideoControlsView *controlsView = [[TWTRVideoControlsView alloc] init];
+    return [TWTRVideoControlsView inlineControlsWithFullscreenToggle:true];
+}
 
-    [controlsView prepareInlineSubviews];
++ (TWTRVideoControlsView *)inlineControlsWithFullscreenToggle:(BOOL)shouldShowFullscreenToggle
+{
+    TWTRVideoControlsView *controlsView = [[TWTRVideoControlsView alloc] init];
+    [controlsView prepareInlineSubviewsWithFullscreenToggle:shouldShowFullscreenToggle];
+
     return controlsView;
 }
 
 + (TWTRVideoControlsView *)fullscreenControls
 {
     TWTRVideoControlsView *controlsView = [[TWTRVideoControlsView alloc] init];
-
     [controlsView prepareFullscreenSubviews];
+
     return controlsView;
 }
 
@@ -187,30 +192,38 @@ static const CGFloat TWTRControlsMinimumTappableSizeInPoints = 44.0;
 
 #pragma mark - View Creation
 
-- (void)prepareInlineSubviews
+- (void)prepareInlineSubviewsWithFullscreenToggle:(BOOL)shouldShowFullscreenToggle
 {
-    _fullScreenButton = [UIButton buttonWithType:UIButtonTypeSystem];
+    if (shouldShowFullscreenToggle) {
+        _fullScreenButton = [UIButton buttonWithType:UIButtonTypeSystem];
+        [_fullScreenButton addTarget:self action:@selector(didTapFullscreenButton) forControlEvents:UIControlEventTouchUpInside];
+        [_fullScreenButton setImage:[TWTRImages mediaExpandTemplateImage] forState:UIControlStateNormal];
+    }
+
     _timeRemainingLabel = [[UILabel alloc] init];
-
-    [_fullScreenButton addTarget:self action:@selector(didTapFullscreenButton) forControlEvents:UIControlEventTouchUpInside];
-    [_fullScreenButton setImage:[TWTRImages mediaExpandTemplateImage] forState:UIControlStateNormal];
-
     _timeRemainingLabel.font = [UIFont boldSystemFontOfSize:14.0];
     _timeRemainingLabel.textAlignment = NSTextAlignmentCenter;
     _timeRemainingLabel.backgroundColor = [[UIColor blackColor] colorWithAlphaComponent:0.3];
     _timeRemainingLabel.layer.cornerRadius = 4.0;
     _timeRemainingLabel.clipsToBounds = YES;
 
-    for (UIView *subview in @[_fullScreenButton, _timeRemainingLabel]) {
+    NSArray<UIView *> *subviews = shouldShowFullscreenToggle ? @[_fullScreenButton, _timeRemainingLabel] : @[_timeRemainingLabel];
+    for (UIView *subview in subviews) {
         subview.translatesAutoresizingMaskIntoConstraints = NO;
         [self addSubview:subview];
     }
 
     NSDictionary *metrics = @{ @"labelwidth": @([self desirableWidthForTimeRemainingLabel]) };
-    NSDictionary *views = @{@"button": self.fullScreenButton, @"label": self.timeRemainingLabel};
-    [TWTRViewUtil addVisualConstraints:@"V:[button(24)]-|" metrics:metrics views:views];
-    [TWTRViewUtil addVisualConstraints:@"V:[label(16)]-|" metrics:metrics views:views];
-    [TWTRViewUtil addVisualConstraints:@"H:|-[label(labelwidth)]-(>=10)-[button(24)]-|" metrics:metrics views:views];
+    if (shouldShowFullscreenToggle) {
+        NSDictionary *views = @{@"button": self.fullScreenButton, @"label": self.timeRemainingLabel};
+        [TWTRViewUtil addVisualConstraints:@"V:[button(24)]-|" metrics:metrics views:views];
+        [TWTRViewUtil addVisualConstraints:@"V:[label(16)]-|" metrics:metrics views:views];
+        [TWTRViewUtil addVisualConstraints:@"H:|-[label(labelwidth)]-(>=10)-[button(24)]-|" metrics:metrics views:views];
+    } else {
+        NSDictionary *views = @{@"label": self.timeRemainingLabel};
+        [TWTRViewUtil addVisualConstraints:@"V:[label(16)]-|" metrics:metrics views:views];
+        [TWTRViewUtil addVisualConstraints:@"H:|-[label(labelwidth)]" metrics:metrics views:views];
+    }
 
     [self updateForControlState:TWTRVideoPlaybackStatePaused];
     [self updateTintColorForSubviews];

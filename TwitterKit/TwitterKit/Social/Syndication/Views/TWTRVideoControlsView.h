@@ -48,6 +48,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)updateScrubberWithValue:(CGFloat)value;
 
 + (TWTRVideoControlsView *)inlineControls;
++ (TWTRVideoControlsView *)inlineControlsWithFullscreenToggle:(BOOL)shouldShowFullscreenToggle;
 + (TWTRVideoControlsView *)fullscreenControls;
 
 @end

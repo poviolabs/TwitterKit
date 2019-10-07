@@ -38,9 +38,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - Init
 
-- (instancetype)initWithTweet:(TWTRTweet *)tweet playbackConfiguration:(TWTRVideoPlaybackConfiguration *)playbackConfiguration controlsView:(nullable TWTRVideoControlsView *)controlsView previewImage:(nullable UIImage *)previewImage
+- (instancetype)initWithTweet:(nullable TWTRTweet *)tweet playbackConfiguration:(TWTRVideoPlaybackConfiguration *)playbackConfiguration controlsView:(nullable TWTRVideoControlsView *)controlsView previewImage:(nullable UIImage *)previewImage
 {
-    TWTRParameterAssertOrReturnValue(tweet, nil);
     TWTRParameterAssertOrReturnValue(playbackConfiguration, nil);
 
     if (self = [super init]) {
