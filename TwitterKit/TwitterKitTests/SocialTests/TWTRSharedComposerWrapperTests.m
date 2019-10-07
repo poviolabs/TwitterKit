@@ -24,6 +24,7 @@
 #import "TWTRTwitter.h"
 #import "TWTRTwitter_Private.h"
 #import "TwitterShareExtensionUI.h"
+#import "TWTRVideoUtility.h"
 
 @interface TWTRSETweetShareViewController ()
 @property (nonatomic, nonnull, readonly) TWTRSETweetShareConfiguration *configuration;
@@ -32,8 +33,6 @@
 @interface TWTRComposerNetworking ()
 @property (nonatomic) NSData *pendingVideoData;
 @end
-
-UIImage *videoThumbnail(NSURL *url);
 
 @interface TWTRSharedComposerWrapperTests : XCTestCase
 
@@ -60,21 +59,16 @@ UIImage *videoThumbnail(NSURL *url);
     TWTRSharedComposerWrapper *composer = [[TWTRSharedComposerWrapper alloc] initWithInitialText:nil image:image videoURL:nil];
     TWTRSETweetAttachmentImage *attachment = (TWTRSETweetAttachmentImage *)composer.configuration.initialTweet.attachment;
 
-    XCTAssertEqualObjects(attachment.image, image);
+    XCTAssertEqualObjects(attachment.image, nil);
 }
 
-- (void)testInit_usesVideoThumbnail
+- (void)testInit_usesVideo
 {
     NSURL *videoFileURL = [TWTRFixtureLoader videoFileURL];
     TWTRSharedComposerWrapper *composer = [[TWTRSharedComposerWrapper alloc] initWithInitialText:nil image:nil videoURL:videoFileURL];
-    TWTRSETweetAttachmentImage *attachment = (TWTRSETweetAttachmentImage *)composer.configuration.initialTweet.attachment;
+    TWTRSETweetAttachmentMedia *attachment = (TWTRSETweetAttachmentMedia *)composer.configuration.initialTweet.attachment;
 
-    XCTAssertNotNil(attachment.image);
-
-    UIImage *thumbnail = videoThumbnail(videoFileURL);
-    NSData *expected = UIImagePNGRepresentation(attachment.image);
-    NSData *actual = UIImagePNGRepresentation(thumbnail);
-    XCTAssertEqualObjects(expected, actual);
+    XCTAssertNotNil(attachment.videoURL);
 }
 
 - (void)testInitWithVideoURL_setsVideoDataOnComposerNetworking

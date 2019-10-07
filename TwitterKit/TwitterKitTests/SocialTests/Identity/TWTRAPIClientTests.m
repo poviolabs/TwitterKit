@@ -27,10 +27,12 @@
 #import "TWTRTestSessionStore.h"
 #import "TWTRTimelineCursor.h"
 #import "TWTRTwitter.h"
+#import "TWTRMediaMIMEType.h"
 
 @interface TWTRAPIClient ()
 
-- (void)postAppendWithMediaID:(NSString *)mediaID videoString:(NSString *)videoString completion:(TWTRMediaUploadResponseCompletion)completion;
+- (void)uploadFileWithData:(NSData *)data contentType:(NSString *)contentType completion:(TWTRMediaUploadResponseCompletion)completion;
+- (void)postAppendWithMediaID:(NSString *)mediaID data:(NSData *)data completion:(TWTRMediaUploadResponseCompletion)completion;
 - (void)postFinalizeWithMediaID:(NSString *)mediaID completion:(TWTRMediaUploadResponseCompletion)completion;
 
 @end
@@ -761,7 +763,7 @@
 
 - (void)testSendTweetWithImage_callsCompletionWithError
 {
-    NSError *fakeError = [NSError errorWithDomain:TWTRErrorDomain code:0 userInfo:nil];
+    NSError *fakeError = [NSError errorWithDomain:TWTRErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey: @"Error: no images to upload"}];
     self.clientStub.responseError = fakeError;
 
     XCTestExpectation *completionExpectation = [self expectationWithDescription:@"Completion block called."];
@@ -777,32 +779,31 @@
 
 - (void)testSendTweetWithImage_sendsMediaId
 {
-    [self.clientStub sendTweetWithText:@"Text"
-                                 image:[UIImage new]
-                            completion:^(TWTRTweet *tweet, NSError *uploadError){
-                            }];
+    NSData *imageData = [TWTRFixtureLoader dataFromFile:@"test" ofType:@"png"];
+    UIImage *image = [UIImage imageWithData:imageData];
 
-    XCTAssertEqualObjects([self.clientStub sentHTTPBodyString], @"media_ids=982389&status=Text");
+    [self.clientStub sendTweetWithText:@"Text"
+                                 image:image
+                            completion:^(TWTRTweet *tweet, NSError *uploadError) {
+        XCTAssertEqualObjects(tweet, nil);
+    }];
 }
 
 - (void)testUploadVideo
 {
     // TODO: Get actual videoData from TSE video test patch later
-    [self.clientStub uploadVideoWithVideoData:[TWTRFixtureLoader userResponseData]
-                                   completion:^(NSString *mediaID, NSError *error){
-                                   }];
-
-    XCTAssertEqualObjects([self.clientStub.sentRequest.URL absoluteString], @"https://upload.twitter.com/1.1/media/upload.json");
-    XCTAssertEqualObjects(self.clientStub.sentRequest.HTTPMethod, @"POST");
-    NSString *expectedHTTPBody = @"command=INIT&media_type=video%2Fmp4&total_bytes=4959";
-    XCTAssertEqualObjects([self.clientStub sentHTTPBodyString], expectedHTTPBody);
+    [self.clientStub uploadFileWithData:[TWTRFixtureLoader userResponseData]
+                            contentType:TWTRTweetMediaMIMEContentTypeMP4
+                             completion:^(NSString *mediaID, NSError *error) {
+        XCTAssertEqualObjects(mediaID, @"982389");
+    }];
 }
 
 - (void)testSendTweetWithVideo_PostAppend
 {
     // TODO: Make a Mock object to test if the APPEND call is made in the process.
     [self.clientStub postAppendWithMediaID:@"fakeID"
-                               videoString:@"fakeVideoString"
+                                      data:[@"fakeVideoString" dataUsingEncoding:NSUTF8StringEncoding]
                                 completion:^(NSString *mediaID, NSError *error){
                                 }];
 
