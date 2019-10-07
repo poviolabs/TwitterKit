@@ -48,6 +48,15 @@
     return nil;
 }
 
+- (void)uploadFileWithData:(NSData *)data contentType:(NSString *)contentType completion:(TWTRMediaUploadResponseCompletion)completion
+{
+    if (self.uploadError) {
+        completion(nil, self.uploadError);
+    } else {
+        completion(@"982389", nil);
+    }
+}
+
 - (void)uploadMedia:(NSData *)media contentType:(NSString *)contentType completion:(TWTRMediaUploadResponseCompletion)completion
 {
     if (self.uploadError) {
@@ -56,6 +65,7 @@
         completion(@"982389", nil);
     }
 }
+
 - (void)postToUploadPathWithParameters:(NSDictionary *)parameters completion:(TWTRJSONRequestCompletion)completion
 {
     if (self.uploadError) {

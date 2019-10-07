@@ -30,7 +30,7 @@
 
 - (TWTRAPIClient *)clientWithAccount:(TWTRComposerAccount *)account;
 - (NSString *)textForTweet:(TWTRSETweet *)tweet;
-- (UIImage *)imageForTweet:(TWTRSETweet *)tweet;
+- (NSArray<NSData *> *)imagesForTweet:(TWTRSETweet *)tweet;
 
 @end
 
@@ -106,15 +106,16 @@
 - (void)testImageForTweet_returnsImageIfExists
 {
     UIImage *image = [TWTRImages verifiedIcon];
-    TWTRSETweet *tweetWithImage = [[TWTRSETweet alloc] initWithInReplyToTweetID:nil text:@"Tweet text" attachment:[[TWTRSETweetAttachmentImage alloc] initWithImage:image] place:nil usernames:nil hashtags:nil];
+    NSData *imageData = UIImagePNGRepresentation(image);
+    TWTRSETweet *tweetWithImage = [[TWTRSETweet alloc] initWithInReplyToTweetID:nil text:@"Tweet text" attachment:[[TWTRSETweetAttachmentImage alloc] initWithImageData:imageData] place:nil usernames:nil hashtags:nil];
 
-    UIImage *receivedImage = [self.networking imageForTweet:tweetWithImage];
-    XCTAssertEqualObjects(receivedImage, image);
+    NSData *receivedImageData = [self.networking imagesForTweet:tweetWithImage][0];
+    XCTAssertEqualObjects(receivedImageData, imageData);
 }
 
 - (void)testImageForTweet_returnsNilIfNoImage
 {
-    XCTAssertNil([self.networking imageForTweet:self.fakeTweet]);
+    XCTAssertNil([self.networking imagesForTweet:self.fakeTweet]);
 }
 
 #pragma mark - Send Tweet
@@ -138,13 +139,9 @@
 
     [self.networking sendTweet:tweetWithImage
                    fromAccount:[TWTRComposerAccount new]
-                    completion:^(TWTRSENetworkingResult result){
-                    }];
-
-    NSString *sentBody = [self.stubClient sentHTTPBodyString];
-    NSString *expectedBody = @"media_ids=982389&status=Tweet%20text";
-
-    XCTAssertEqualObjects(sentBody, expectedBody);
+                    completion:^(TWTRSENetworkingResult result) {
+        XCTAssertEqual(result, TWTRSENetworkingResultError);
+    }];
 }
 
 - (void)testSendTweet_sendsURLInText
@@ -154,7 +151,7 @@
 
     [self.networking sendTweet:tweet
                    fromAccount:[TWTRComposerAccount new]
-                    completion:^(TWTRSENetworkingResult result){
+                    completion:^(TWTRSENetworkingResult result) {
                     }];
 
     NSString *sentBody = [self.stubClient sentHTTPBodyString];
