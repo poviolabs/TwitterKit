@@ -17,6 +17,7 @@
 
 #import "TWTRVideoUtility.h"
 #import <AVFoundation/AVFoundation.h>
+#import <ImageIO/ImageIO.h>
 #import <CoreServices/CoreServices.h>
 
 @implementation TWTRVideoUtility

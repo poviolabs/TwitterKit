@@ -170,6 +170,8 @@ static NSString *const TWTRSessionStoreGuestUserName = @"com.twitter.sdk.ios.cor
     return [[self existingUserSessions] lastObject];
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-implementations"
 - (void)logInWithSystemAccountsCompletion:(TWTRSessionLogInCompletion)completion __TVOS_UNAVAILABLE
 {
     TWTRParameterAssertOrReturn(completion);
@@ -184,6 +186,7 @@ static NSString *const TWTRSessionStoreGuestUserName = @"com.twitter.sdk.ios.cor
         });
     }];
 }
+#pragma clang diagnostic pop
 
 - (void)logOutUserID:(NSString *)userID
 {
