@@ -17,12 +17,17 @@
 
 #import "TWTRSETweetImageAttachmentView.h"
 #import "TWTRSETweetAttachment.h"
+#import "TWTRAnimatableImageView.h"
+#import "TWTRImageLoaderImageUtils.h"
+#import "TWTRMediaMIMEType.h"
 
 #pragma mark -
 
 @interface TWTRSETweetImageAttachmentView ()
 
 @property (nonatomic, readonly) UIImageView *imageView;
+// TODO: enable for GIF animation preview
+// @property (nonatomic, readonly) TWTRAnimatableImageView *animatableImageView;
 
 @end
 
@@ -41,26 +46,27 @@
         }
 
         [self addSubview:_imageView];
+        [self setUpConstraintsForView:_imageView scale:_imageView.image.size.height / _imageView.image.size.width];
 
-        [self setUpConstraints];
+        if ([[TWTRImageLoaderImageUtils mimeTypeForImageData:imageAttachment.imageData] isEqualToString:TWTRTweetMediaMIMEContentTypeGIF]) {
+            // TODO: parse with AnimatedImage, then set animationImages/Duration...
+        }
     }
 
     return self;
 }
 
-- (void)setUpConstraints
+- (void)setUpConstraintsForView:(UIView *)view scale:(CGFloat)scale
 {
-    CGSize imageSize = self.imageView.image.size;
-    CGFloat scale = imageSize.height / imageSize.width;
-    self.imageView.translatesAutoresizingMaskIntoConstraints = NO;
-    [self.imageView.centerXAnchor constraintEqualToAnchor:self.centerXAnchor].active = YES;
-    [self.imageView.topAnchor constraintEqualToAnchor:self.topAnchor].active = YES;
-    [self.imageView.leftAnchor constraintEqualToAnchor:self.leftAnchor].active = YES;
+    view.translatesAutoresizingMaskIntoConstraints = NO;
+    [view.centerXAnchor constraintEqualToAnchor:self.centerXAnchor].active = YES;
+    [view.topAnchor constraintEqualToAnchor:self.topAnchor].active = YES;
+    [view.leftAnchor constraintEqualToAnchor:self.leftAnchor].active = YES;
 
-    [self.imageView.widthAnchor constraintEqualToAnchor:self.widthAnchor].active = YES;
+    [view.widthAnchor constraintEqualToAnchor:self.widthAnchor].active = YES;
 
-    [self.imageView.heightAnchor constraintEqualToAnchor:self.imageView.widthAnchor multiplier:scale].active = YES;
-    [self.heightAnchor constraintEqualToAnchor:self.imageView.heightAnchor].active = YES;
+    [view.heightAnchor constraintEqualToAnchor:view.widthAnchor multiplier:scale].active = YES;
+    [self.heightAnchor constraintEqualToAnchor:view.heightAnchor].active = YES;
 }
 
 @end

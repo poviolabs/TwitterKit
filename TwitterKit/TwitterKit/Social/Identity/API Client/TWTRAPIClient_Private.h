@@ -224,13 +224,14 @@ typedef NSArray *_Nonnull (^TWTRTimelineParsedResponseHandler)(id parsedResponse
 - (void)unretweetTweetWithID:(NSString *)tweetID completion:(TWTRTweetActionCompletion)completion;
 
 /**
- *  Upload a media (video)
+ *  Upload a file (image/video/GIF)
  *  Return the same mediaID, or error if fails.
  *
- *  @param videoData   (required) NSData of video to be uploaded.
+ *  @param data   (required) NSData of file to be uploaded.
+ *  @param contentType The HTTP content type of the media that you are uploading.
  *  @param completion  The completion handler to invoke.
  */
-- (void)uploadVideoWithVideoData:(nonnull NSData *)videoData completion:(TWTRMediaUploadResponseCompletion)completion;
+- (void)uploadFileWithData:(NSData *)data contentType:(NSString *)contentType completion:(TWTRMediaUploadResponseCompletion)completion;
 
 /**
  *  Create and send a Tweet given a text and media ID. Returns either a TWTRTweet or an NSError.

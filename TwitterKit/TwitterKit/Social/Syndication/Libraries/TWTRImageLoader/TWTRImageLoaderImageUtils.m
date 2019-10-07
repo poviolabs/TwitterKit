@@ -16,6 +16,7 @@
  */
 
 #import "TWTRImageLoaderImageUtils.h"
+#import "TWTRMediaMIMEType.h"
 #import <TwitterCore/TWTRAssertionMacros.h>
 
 @implementation TWTRImageLoaderImageUtils
@@ -34,7 +35,33 @@
 
     CGFloat clampedCompressionQuality = MIN(MAX(0, compressionQuality), 1);
     const BOOL imageHasAlpha = [TWTRImageLoaderImageUtils imageHasAlphaChannel:image];
-    return imageHasAlpha ? UIImagePNGRepresentation(image) : UIImageJPEGRepresentation(image, clampedCompressionQuality);
+    NSData *data = imageHasAlpha ? UIImagePNGRepresentation(image) : UIImageJPEGRepresentation(image, clampedCompressionQuality);
+    return data != nil ? data : [[NSData alloc] init];
+}
+
++ (NSData *)imageDataFromImage:(UIImage *)image
+{
+    return [TWTRImageLoaderImageUtils imageDataFromImage:image compressionQuality:1.0];
+}
+
++ (NSString *)mimeTypeForImageData:(NSData *)data
+{
+    char bytes[12] = {0};
+    [data getBytes:&bytes length:12];
+
+    const char gif[3] = {'G', 'I', 'F'};
+    const char jpg[3] = {0xff, 0xd8, 0xff};
+    const char png[8] = {0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a};
+
+    if (!memcmp(bytes, gif, 3)) {
+        return TWTRTweetMediaMIMEContentTypeGIF;
+    } else if (!memcmp(bytes, jpg, 3)) {
+        return TWTRTweetMediaMIMEContentTypeJPG;
+    } else if (!memcmp(bytes, png, 8)) {
+        return TWTRTweetMediaMIMEContentTypePNG;
+    }
+
+    return nil;
 }
 
 @end

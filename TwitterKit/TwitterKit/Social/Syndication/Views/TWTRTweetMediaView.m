@@ -38,12 +38,15 @@
 #import "TWTRVideoPlayerView.h"
 #import "TWTRVideoViewController.h"
 #import "TWTRViewUtil.h"
+#import "TWTRVideoUtility.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface TWTRTweetMediaView () <TWTRVideoViewControllerDelegate>
 
 @property (nonatomic, readonly, nullable) TWTRTweet *tweet;
+@property (nonatomic, readonly, nullable) NSArray<UIImage *> *images;
+@property (nonatomic, readonly, nullable) NSURL *videoURL;
 @property (nonatomic) NSMutableArray<TWTRTweetImageView *> *imageViews;
 @property (nonatomic, nullable) TWTRVideoPlayerView *inlinePlayerView;
 @property (nonatomic, readonly) NSLayoutConstraint *aspectRatioConstraint;
@@ -99,12 +102,60 @@ static const CGFloat TWTRImageCornerRadius = 4.0;
 
 - (void)prepareInlinePlayerForTweet:(nullable TWTRTweet *)tweet
 {
-    if ([tweet hasPlayableVideo]) {
+    if ([self hasPlayableVideo]) {
         if ([self.subviews containsObject:self.inlinePlayerView]) {
             [self.inlinePlayerView removeFromSuperview];
         }
 
-        self.inlinePlayerView = [[TWTRVideoPlayerView alloc] initWithTweet:tweet playbackConfiguration:[self videoPlaybackConfiguration] controlsView:[TWTRVideoControlsView inlineControls] previewImage:[self videoThumbnail].image];
+        self.inlinePlayerView = [[TWTRVideoPlayerView alloc] initWithTweet:tweet
+                                                     playbackConfiguration:[self videoPlaybackConfiguration]
+                                                              controlsView:[TWTRVideoControlsView inlineControls]
+                                                              previewImage:[self videoThumbnail].image];
+        self.inlinePlayerView.shouldSetChromeVisible = NO;
+        self.inlinePlayerView.delegate = self;
+        self.inlinePlayerView.aspectRatio = TWTRVideoPlayerAspectRatioAspectFill;
+        self.inlinePlayerView.translatesAutoresizingMaskIntoConstraints = NO;
+        [self insertSubview:self.inlinePlayerView belowSubview:[self videoThumbnail]];
+    } else {
+        [self.inlinePlayerView removeFromSuperview];
+        self.inlinePlayerView = nil;
+    }
+}
+
+- (void)prepareImageViewsForImages:(nullable NSArray<UIImage *> *)images
+{
+    // Inefficiently remove image views
+    for (UIImageView *imageView in self.imageViews) {
+        [imageView removeFromSuperview];
+    }
+
+    NSMutableArray *imageViews = [NSMutableArray array];
+
+    for (UIImage *image in images) {
+        TWTRTweetImageView *imageView = [[TWTRTweetImageView alloc] init];
+        imageView.image = image;
+        [self addSubview:imageView];
+        [imageViews addObject:imageView];
+    }
+
+    if (imageViews.count > 0) {
+        [TWTRMultiPhotoLayout layoutViews:imageViews];
+    }
+
+    self.imageViews = imageViews;
+}
+
+- (void)prepareInlinePlayerForVideoURL:(nullable NSURL *)videoURL
+{
+    if (videoURL != nil) {
+        if ([self.subviews containsObject:self.inlinePlayerView]) {
+            [self.inlinePlayerView removeFromSuperview];
+        }
+
+        self.inlinePlayerView = [[TWTRVideoPlayerView alloc] initWithTweet:nil
+                                                     playbackConfiguration:[self videoPlaybackConfiguration]
+                                                              controlsView:[TWTRVideoControlsView inlineControlsWithFullscreenToggle:false]
+                                                              previewImage:[self videoThumbnail].image];
         self.inlinePlayerView.shouldSetChromeVisible = NO;
         self.inlinePlayerView.delegate = self;
         self.inlinePlayerView.aspectRatio = TWTRVideoPlayerAspectRatioAspectFill;
@@ -127,11 +178,13 @@ static const CGFloat TWTRImageCornerRadius = 4.0;
 - (NSArray *)mediaDisplayConfigurations
 {
     NSMutableArray *mediaConfigurations = [NSMutableArray array];
-    if ([self.tweet hasVineCard]) {
-        [mediaConfigurations addObject:[TWTRMediaEntityDisplayConfiguration mediaEntityDisplayConfigurationWithCardEntity:self.tweet.cardEntity]];
-    } else if ([self.tweet hasMedia]) {
-        for (TWTRTweetMediaEntity *entity in self.tweet.media) {
-            [mediaConfigurations addObject:[[TWTRMediaEntityDisplayConfiguration alloc] initWithMediaEntity:entity targetWidth:[self desiredWidth]]];
+    if (self.tweet != nil) {
+        if ([self.tweet hasVineCard]) {
+            [mediaConfigurations addObject:[TWTRMediaEntityDisplayConfiguration mediaEntityDisplayConfigurationWithCardEntity:self.tweet.cardEntity]];
+        } else if ([self.tweet hasMedia]) {
+            for (TWTRTweetMediaEntity *entity in self.tweet.media) {
+                [mediaConfigurations addObject:[[TWTRMediaEntityDisplayConfiguration alloc] initWithMediaEntity:entity targetWidth:[self desiredWidth]]];
+            }
         }
     }
 
@@ -160,7 +213,7 @@ static const CGFloat TWTRImageCornerRadius = 4.0;
 
 - (CGSize)sizeThatFits:(CGSize)size
 {
-    return CGSizeMake(size.width, (self.tweet.hasMedia) ? floor(size.width / self.aspectRatio) : 0.0);
+    return CGSizeMake(size.width, (self.hasMedia) ? floor(size.width / self.aspectRatio) : 0.0);
 }
 
 #pragma mark - constraints
@@ -214,6 +267,19 @@ static const CGFloat TWTRImageCornerRadius = 4.0;
     [self setAspectRatioConstraintNeedsUpdate];
 }
 
+- (void)configureWithImages:(nullable NSArray<UIImage *> *)images videoURL:(nullable NSURL *)videoURL style:(TWTRTweetViewStyle)style
+{
+    _images = images;
+    _videoURL = videoURL;
+    _style = style;
+
+    [self prepareImageViewsForImages:images];
+    [self prepareInlinePlayerForVideoURL:videoURL];
+    [self addPlayIconIfNeeded];
+    [self roundCornersIfNeeded];
+    [self setAspectRatioConstraintNeedsUpdate];
+}
+
 - (void)addPlayIconIfNeeded
 {
     if ([self shouldShowPlayButtonForEmbeddableVideo] || [self isShowingVideoThumbnail]) {
@@ -234,29 +300,50 @@ static const CGFloat TWTRImageCornerRadius = 4.0;
 
 - (BOOL)isShowingVideoThumbnail
 {
-    return [self.tweet hasPlayableVideo];
+    return [self hasPlayableVideo];
 }
 
 - (BOOL)shouldShowPlayButtonForEmbeddableVideo
 {
-    if ([self.tweet hasMedia]) {
-        TWTRTweetMediaEntity *mediaEntity = [self.tweet.media firstObject];
-        if ([mediaEntity isEmbeddableDefined] && ![mediaEntity embeddable]) {
-            return YES;
+    if (self.tweet != nil) {
+        if ([self.tweet hasMedia]) {
+            TWTRTweetMediaEntity *mediaEntity = [self.tweet.media firstObject];
+            if ([mediaEntity isEmbeddableDefined] && ![mediaEntity embeddable]) {
+                return YES;
+            }
         }
+        return NO;
+    } else {
+        return self.videoURL != nil;
     }
+}
 
-    return NO;
+- (BOOL)hasMedia
+{
+    if (self.tweet != nil) {
+        return [self.tweet hasMedia];
+    } else {
+        return self.videoURL != nil || self.images.count > 0;
+    }
 }
 
 - (BOOL)isShowingMedia
 {
-    return [self.tweet hasMedia];
+    return [self hasMedia];
+}
+
+- (BOOL)hasPlayableVideo
+{
+    if (self.tweet != nil) {
+        return [self.tweet hasPlayableVideo];
+    } else {
+        return self.videoURL != nil;
+    }
 }
 
 - (void)playVideo
 {
-    if ([self.tweet hasPlayableVideo] && self.inlinePlayerView != nil) {
+    if ([self hasPlayableVideo] && self.inlinePlayerView != nil) {
         [self videoThumbnail].hidden = YES;
         self.inlinePlayerView.shouldPlayVideoMuted = self.shouldPlayVideoMuted;
         [self.inlinePlayerView loadVideo];
@@ -266,7 +353,7 @@ static const CGFloat TWTRImageCornerRadius = 4.0;
 
 - (void)pauseVideo
 {
-    if ([self.tweet hasPlayableVideo] && self.inlinePlayerView != nil) {
+    if ([self hasPlayableVideo] && self.inlinePlayerView != nil) {
         [self.inlinePlayerView pauseVideo];
     }
 }
@@ -288,7 +375,7 @@ static const CGFloat TWTRImageCornerRadius = 4.0;
 
 - (BOOL)presentDetailedViewForMediaEntityAtIndex:(NSInteger)idx
 {
-    if ([self.tweet hasPlayableVideo]) {
+    if ([self hasPlayableVideo]) {
         [self playVideo];
         return YES;
     } else if ([self shouldShowPlayButtonForEmbeddableVideo]) {
@@ -432,11 +519,21 @@ static const CGFloat TWTRImageCornerRadius = 4.0;
 
 - (TWTRVideoPlaybackConfiguration *)videoPlaybackConfiguration
 {
-    TWTRTweetMediaEntity *mediaEntity = self.firstMediaEntity;
-    if (mediaEntity) {
-        return [TWTRVideoPlaybackConfiguration playbackConfigurationForTweetMediaEntity:mediaEntity];
+    if (self.tweet != nil) {
+        TWTRTweetMediaEntity *mediaEntity = self.firstMediaEntity;
+        if (mediaEntity) {
+            return [TWTRVideoPlaybackConfiguration playbackConfigurationForTweetMediaEntity:mediaEntity];
+        } else {
+            return [TWTRVideoPlaybackConfiguration playbackConfigurationForCardEntity:self.tweet.cardEntity URLEntities:self.tweet.urls];
+        }
     } else {
-        return [TWTRVideoPlaybackConfiguration playbackConfigurationForCardEntity:self.tweet.cardEntity URLEntities:self.tweet.urls];
+        CGSize thumbnailSize = [self videoThumbnail].image.size;
+        return [[TWTRVideoPlaybackConfiguration alloc] initWithVideoURL:self.videoURL
+                                                            aspectRatio:thumbnailSize.width / thumbnailSize.height
+                                                               duration:[TWTRVideoUtility videoDuration:self.videoURL]
+                                                              mediaType:TWTRMediaTypeVideo
+                                                                mediaID:[NSUUID UUID].UUIDString
+                                                  deeplinkConfiguration:nil];
     }
 }
 

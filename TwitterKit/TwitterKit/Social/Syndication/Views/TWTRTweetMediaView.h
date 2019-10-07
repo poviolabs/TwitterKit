@@ -81,6 +81,14 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)configureWithTweet:(nullable TWTRTweet *)tweet style:(TWTRTweetViewStyle)style;
 
 /**
+ * Call this method to update the image view with the given parameters and style.
+ * @param images images to display
+ * @param videoURL video to display
+ * @param style the style of the tweet view (used to determine layout)
+ */
+- (void)configureWithImages:(nullable NSArray<UIImage *> *)images videoURL:(nullable NSURL *)videoURL style:(TWTRTweetViewStyle)style;
+
+/**
  *  Update the background color of subviews based on the computed
  *  background color passed in.
  *

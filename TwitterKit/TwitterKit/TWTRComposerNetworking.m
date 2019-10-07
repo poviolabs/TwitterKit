@@ -26,7 +26,6 @@
 
 @property (nonatomic) TWTRAPIClient *client;
 @property (nonatomic) NSData *pendingVideoData;
-
 @end
 
 @implementation TWTRComposerNetworking
@@ -53,11 +52,14 @@
     return tweet.text;
 }
 
-- (UIImage *)imageForTweet:(TWTRSETweet *)tweet
+- (NSArray<NSData *> *)imagesForTweet:(TWTRSETweet *)tweet
 {
     // Return image if attachment has an image
-    if ([tweet.attachment respondsToSelector:@selector(image)]) {
-        return [(TWTRSETweetAttachmentImage *)tweet.attachment image];
+    if ([tweet.attachment respondsToSelector:@selector(images)]) {
+        return [(TWTRSETweetAttachmentMedia *)tweet.attachment images];
+    } else if ([tweet.attachment respondsToSelector:@selector(imageData)]) {
+        NSData *imageData = [(TWTRSETweetAttachmentImage *)tweet.attachment imageData];
+        return @[imageData];
     }
 
     return nil;
@@ -91,7 +93,7 @@
         }
 
         // Next attempted send should not use previous video data
-        [weakSelf cancelPendingVideoUpload];
+        [weakSelf cancelPendingVideoUpload]; // TODO: Why? Subsequent tap on Tweet will pass with no video data.
 
         // For TWTRSETweetShareViewControllerDelegate
         TWTRSENetworkingResult networkResult = success ? TWTRSENetworkingResultSuccess : TWTRSENetworkingResultError;
@@ -103,9 +105,9 @@
     if (self.pendingVideoData) {
         [client sendTweetWithText:text videoData:self.pendingVideoData completion:sendCompletion];
     } else {
-        UIImage *image = [self imageForTweet:tweet];
-        if (image) {
-            [client sendTweetWithText:text image:image completion:sendCompletion];
+        NSArray<NSData *> *images = [self imagesForTweet:tweet];
+        if (images) {
+            [client sendTweetWithText:text images:images completion:sendCompletion];
         } else {
             [client sendTweetWithText:text completion:sendCompletion];
         }

@@ -222,6 +222,15 @@ typedef void (^TWTRRequestEmailCompletion)(NSString *_Nullable email, NSError *_
 - (void)sendTweetWithText:(NSString *)tweetText image:(UIImage *)image completion:(TWTRSendTweetCompletion)completion;
 
 /**
+ *  Upload media and create a Tweet. Returns TWTRTweet to be used when debugging.
+ *
+ *  @param tweetText   The text for a Tweet
+ *  @param images      UIImages to upload
+ *  @param completion  The completion handler to invoke.
+ */
+- (void)sendTweetWithText:(NSString *)tweetText images:(NSArray<NSData *> *)images completion:(TWTRSendTweetCompletion)completion;
+
+/**
  *  Create a Tweet with a video. Returns TWTRTweet to be used when debugging.
  *
  *  Note: there are several requirements of the video being uploaded:

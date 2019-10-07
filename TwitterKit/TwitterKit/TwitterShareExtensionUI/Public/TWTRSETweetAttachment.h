@@ -37,8 +37,19 @@ FOUNDATION_EXTERN NSString *const TWTRSETweetShareExtensionErrorDomain;
 @interface TWTRSETweetAttachmentImage : NSObject <TWTRSETweetAttachment>
 
 @property (nonatomic, readonly) UIImage *image;
+@property (nonatomic, readonly) NSData *imageData;
 
 - (instancetype)initWithImage:(UIImage *)image;
+- (instancetype)initWithImageData:(NSData *)imageData;
+
+@end
+
+@interface TWTRSETweetAttachmentMedia : NSObject <TWTRSETweetAttachment>
+
+@property (nonatomic, readonly, nullable) NSArray<NSData *> *images;
+@property (nonatomic, readonly, nullable) NSURL *videoURL;
+
+- (instancetype)initWithImages:(nullable NSArray<NSData *> *)images videoURL:(nullable NSURL *)videoURL;
 
 @end
 
