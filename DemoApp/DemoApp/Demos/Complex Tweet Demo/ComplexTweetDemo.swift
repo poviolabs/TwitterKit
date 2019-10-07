@@ -21,7 +21,11 @@ struct ComplexTweetDemo: Demo {
         TweetComposerDemo(),
         TweetComposerViewControllerDemo(),
         TweetComposerViewControllerWithMediaDemo(),
-        TweetComposerViewControllerWithPhotosFramework()
+        TweetComposerViewControllerWithPhotosFramework(),
+        TweetComposerViewControllerWithLocalJPGDemo(),
+        TweetComposerViewControllerWithLocalPNGDemo(),
+        TweetComposerViewControllerWithLocalGIFDemo(),
+        TweetComposerViewControllerWithLocalMultiDemo()
     ]
 }
 
@@ -64,6 +68,50 @@ struct TweetComposerViewControllerWithPhotosFramework: Demo {
     var presentationStyle: PresentationStyle = .modal
     var viewController: UIViewController {
         let viewController = TweetComposerViewController(composerType: .tweetViewControllerLastPhoto)
+        viewController.modalPresentationStyle = .overCurrentContext
+        return viewController
+    }
+}
+
+struct TweetComposerViewControllerWithLocalJPGDemo: Demo {
+    var title: String = "TWTRComposerViewController with Local JPG"
+    var description: String = "Demo of the TWTRComposerViewController with local media."
+    var presentationStyle: PresentationStyle = .modal
+    var viewController: UIViewController {
+        let viewController = TweetComposerViewController(composerType: .tweetViewControllerWithLocalJPG)
+        viewController.modalPresentationStyle = .overCurrentContext
+        return viewController
+    }
+}
+
+struct TweetComposerViewControllerWithLocalPNGDemo: Demo {
+    var title: String = "TWTRComposerViewController with Local PNG"
+    var description: String = "Demo of the TWTRComposerViewController with local media."
+    var presentationStyle: PresentationStyle = .modal
+    var viewController: UIViewController {
+        let viewController = TweetComposerViewController(composerType: .tweetViewControllerWithLocalPNG)
+        viewController.modalPresentationStyle = .overCurrentContext
+        return viewController
+    }
+}
+
+struct TweetComposerViewControllerWithLocalGIFDemo: Demo {
+    var title: String = "TWTRComposerViewController with Local GIF"
+    var description: String = "Demo of the TWTRComposerViewController with local media."
+    var presentationStyle: PresentationStyle = .modal
+    var viewController: UIViewController {
+        let viewController = TweetComposerViewController(composerType: .tweetViewControllerWithLocalGIF)
+        viewController.modalPresentationStyle = .overCurrentContext
+        return viewController
+    }
+}
+
+struct TweetComposerViewControllerWithLocalMultiDemo: Demo {
+    var title: String = "TWTRComposerViewController with Local Multiple Images"
+    var description: String = "Demo of the TWTRComposerViewController with local media."
+    var presentationStyle: PresentationStyle = .modal
+    var viewController: UIViewController {
+        let viewController = TweetComposerViewController(composerType: .tweetViewControllerWithLocalMulti)
         viewController.modalPresentationStyle = .overCurrentContext
         return viewController
     }

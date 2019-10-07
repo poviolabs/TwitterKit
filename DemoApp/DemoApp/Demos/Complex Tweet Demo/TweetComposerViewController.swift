@@ -17,6 +17,10 @@ class TweetComposerViewController: UIViewController {
         case tweetViewController
         case tweetViewControllerWithMedia
         case tweetViewControllerLastPhoto
+        case tweetViewControllerWithLocalJPG
+        case tweetViewControllerWithLocalPNG
+        case tweetViewControllerWithLocalGIF
+        case tweetViewControllerWithLocalMulti
     }
 
     enum PhotosError: Error {
@@ -65,6 +69,10 @@ class TweetComposerViewController: UIViewController {
         case .tweetViewController: presentTweetViewController()
         case .tweetViewControllerWithMedia: presentTweetViewControllerWithMedia()
         case .tweetViewControllerLastPhoto: presentTweetViewControllerLastPhoto()
+        case .tweetViewControllerWithLocalJPG: presentTweetViewControllerWithLocalJPG()
+        case .tweetViewControllerWithLocalPNG: presentTweetViewControllerWithLocalPNG()
+        case .tweetViewControllerWithLocalGIF: presentTweetViewControllerWithLocalGIF()
+        case .tweetViewControllerWithLocalMulti: presentTweetViewControllerWithLocalMulti()
         }
     }
 
@@ -85,6 +93,9 @@ class TweetComposerViewController: UIViewController {
         picker.delegate = self
         picker.mediaTypes = [String(kUTTypeImage), String(kUTTypeMovie)]
         picker.modalPresentationStyle = .overCurrentContext
+        if #available(iOS 11.0, *) {
+            picker.videoExportPreset = AVAssetExportPresetPassthrough
+        }
         present(picker, animated: true, completion: nil)
     }
 
@@ -98,6 +109,40 @@ class TweetComposerViewController: UIViewController {
                 self?.present(composer, animated: true)
             }
         }
+    }
+
+    private func presentTweetViewControllerWithLocalJPG() {
+        presentTweetViewControllerWithLocalImage("IMG_1", "JPG")
+    }
+
+    private func presentTweetViewControllerWithLocalPNG() {
+        presentTweetViewControllerWithLocalImage("IMG_2", "PNG")
+    }
+
+    private func presentTweetViewControllerWithLocalGIF() {
+        presentTweetViewControllerWithLocalImage("IMG_3", "GIF")
+    }
+
+    private func presentTweetViewControllerWithLocalImage(_ resource: String, _ type: String) {
+        guard let imageData = dataFromBundleResource(resource, ofType: type) else { return }
+
+        let composer = TWTRComposerViewController(initialText: "Check out this great image: ", images: [imageData], videoURL: nil)
+        composer.delegate = self
+        present(composer, animated: true)
+    }
+
+    private func presentTweetViewControllerWithLocalMulti() {
+        guard let imageData1 = dataFromBundleResource("IMG_1", ofType: "JPG") else { return }
+        guard let imageData2 = dataFromBundleResource("IMG_2", ofType: "PNG") else { return }
+
+        let composer = TWTRComposerViewController(initialText: "Check out these great images: ", images: [imageData1, imageData2], videoURL: nil)
+        composer.delegate = self
+        present(composer, animated: true)
+    }
+
+    private func dataFromBundleResource(_ resource: String, ofType type: String) -> Data? {
+        guard let bundleImagePath = Bundle.main.path(forResource: resource, ofType: type) else { return nil }
+        return try? Data(contentsOf: URL(fileURLWithPath: bundleImagePath))
     }
 
     private func fetchLastPhoto(_ completion: @escaping (UIImage?, Error?) -> Void) {
@@ -130,15 +175,21 @@ class TweetComposerViewController: UIViewController {
 
 extension TweetComposerViewController: TWTRComposerViewControllerDelegate {
     func composerDidCancel(_ controller: TWTRComposerViewController) {
-        dismiss(animated: false, completion: nil)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.dismiss(animated: true, completion: nil)
+        }
     }
 
     func composerDidFail(_ controller: TWTRComposerViewController, withError error: Error) {
-        dismiss(animated: false, completion: nil)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.dismiss(animated: true, completion: nil)
+        }
     }
 
     func composerDidSucceed(_ controller: TWTRComposerViewController, with tweet: TWTRTweet) {
-        dismiss(animated: false, completion: nil)
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            self.dismiss(animated: true, completion: nil)
+        }
     }
 }
 
@@ -155,6 +206,10 @@ extension TweetComposerViewController: UIImagePickerControllerDelegate, UINaviga
         picker.dismiss(animated: true)
         if let image = info[UIImagePickerController.InfoKey.originalImage] as? UIImage {
             let composer = TWTRComposerViewController(initialText: "Check out this great image: ", image: image, videoURL: nil)
+            composer.delegate = self
+            self.present(composer, animated: true)
+        } else if let videoURL = info[UIImagePickerController.InfoKey.mediaURL] as? URL {
+            let composer = TWTRComposerViewController(initialText: "Check out this great video: ", images: nil, videoURL: videoURL)
             composer.delegate = self
             self.present(composer, animated: true)
         }
