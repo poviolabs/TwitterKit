@@ -14,8 +14,11 @@
 // limitations under the License.
 //
 
-#import <EarlGrey/GREYConstants.h>
 #import <UIKit/UIKit.h>
+
+#import <EarlGrey/GREYConstants.h>
+
+NS_ASSUME_NONNULL_BEGIN
 
 /**
  *  A utility class for creating and injecting gestures that involve touch paths, for example:
@@ -29,12 +32,14 @@
  *
  *  @param startPointInWindowCoordinates The start point within the given @c window
  *  @param direction                     The direction of the touch path.
+ *  @param duration                      How long the gesture should last (in seconds).
  *  @param window                        The window in which the touch path is generated.
  *
  *  @return NSArray of CGPoints that denote the points in the touch path.
  */
 + (NSArray *)touchPathForGestureWithStartPoint:(CGPoint)startPointInWindowCoordinates
                                   andDirection:(GREYDirection)direction
+                                   andDuration:(CFTimeInterval)duration
                                       inWindow:(UIWindow *)window;
 
 /**
@@ -65,17 +70,22 @@
                          withDirection:(GREYDirection)direction
                                 length:(CGFloat)length
                     startPointPercents:(CGPoint)startPointPercents
-                    outRemainingAmount:(CGFloat *)outRemainingAmountOrNull;
+                    outRemainingAmount:(CGFloat *_Nullable)outRemainingAmountOrNull;
 
 /**
  *  Generates a touch path in the @c window from the given @c startPoint and the given @c
  *  endPoint.
  *
- *  @param startPoint The starting point for touch path.
- *  @param endPoint   The end point for touch path
+ *  @param startPoint    The starting point for touch path.
+ *  @param endPoint      The end point for touch path.
+ *  @param cancelInertia A boolean value indicating whether intertial movement should be cancelled.
  *
  *  @return NSArray of CGPoints that denote the points in the touch path.
  */
 + (NSArray *)touchPathForDragGestureWithStartPoint:(CGPoint)startPoint
-                                       andEndPoint:(CGPoint)endPoint;
+                                          endPoint:(CGPoint)endPoint
+                                     cancelInertia:(BOOL)cancelInertia;
+
 @end
+
+NS_ASSUME_NONNULL_END

@@ -17,6 +17,8 @@
 #import <UIKit/UIKit.h>
 #import <XCTest/XCTest.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  *  Posted immediately prior to XCTestCase::setUp. The @c userInfo dictionary contains
  *  the executing XCTestCase.
@@ -120,5 +122,13 @@ typedef NS_ENUM(NSUInteger, GREYXCTestCaseStatus) {
  */
 - (NSString *)grey_localizedTestOutputsDirectory;
 
+/**
+ *  Sets the value for the test status.
+ *
+ *  @param status The new object-association value for the test status.
+ */
+- (void)grey_setStatus:(GREYXCTestCaseStatus)status;
+
 @end
 
+NS_ASSUME_NONNULL_END

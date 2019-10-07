@@ -16,10 +16,25 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  *  Additions to NSURLConnection to allow EarlGrey to track status for every connection. By
  *  default, EarlGrey tracks all NSURLConnection's, to change this behavior update GREYConfiguration
  *  setting with @c kGREYConfigKeyURLBlacklistRegex key.
  */
 @interface NSURLConnection (GREYAdditions)
+
+/**
+ *  Tracks the current connection as pending in GREYAppStateTracker.
+ */
+- (void)grey_trackPending;
+
+/**
+ *  Untracks the current connection from GREYAppStateTracker, marking it as completed.
+ */
+- (void)grey_untrackPending;
+
 @end
+
+NS_ASSUME_NONNULL_END

@@ -15,9 +15,10 @@
 //
 
 #import <CoreGraphics/CoreGraphics.h>
+#import <Foundation/Foundation.h>
+
 #import <EarlGrey/GREYConstants.h>
 #import <EarlGrey/GREYDefines.h>
-#import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -126,8 +127,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  *  Matcher for UI element that is sufficiently visible to the user. EarlGrey considers elements
- *  with visible area percentage greater than @c kElementSufficientlyVisiblePercentage (0.75)
- *  to be sufficiently visible.
+ *  that are more than @c kElementSufficientlyVisiblePercentage (75 %) visible areawise to be
+ *  sufficiently visible.
  *
  *  @return A matcher intialized with a visibility percentage that confirms an element is
  *          sufficiently visible.
@@ -135,21 +136,19 @@ NS_ASSUME_NONNULL_BEGIN
 + (id<GREYMatcher>)matcherForSufficientlyVisible;
 
 /**
- *  Matcher for UI element that are not visible to the user i.e. has a zero visible area.
+ *  Matcher for UI element that is not visible to the user at all i.e. it has a zero visible area.
  *
  *  @return A matcher for verifying if an element is not visible.
  */
 + (id<GREYMatcher>)matcherForNotVisible;
 
 /**
- *  Matcher for UI element that matches EarlGrey's criteria for user interaction currently it must
+ *  Matcher for UI element that matches EarlGrey's criteria for user interaction. Currently it must
  *  satisfy at least the following criteria:
- *  <ul>
- *    <li>At least a few pixels of the element's UI are visible.</li>
- *    <li>The element's accessibility activation point OR the center of the element's visible area
- *        is visible.</li>
- *  </ul>
- *
+ *  1) At least a few pixels of the element are visible to the user.
+ *  2) The element's accessibility activation point OR the center of the element's visible area
+ *     is completely visible.
+*
  *  @return A matcher that checks if a UI element is interactable.
  */
 + (id<GREYMatcher>)matcherForInteractable;
@@ -204,22 +203,24 @@ NS_ASSUME_NONNULL_BEGIN
 + (id<GREYMatcher>)matcherForConformsToProtocol:(Protocol *)protocol;
 
 /**
- *  Matcher that matches UI element based on the presence of an ancestor in its hierarchy.
- *  The given matcher is used to match decendants.
+ *  Matcher that matches any UI element with an ancestor matching the given @c ancestorMatcher.
  *
- *  @param ancestorMatcher The ancestor UI element whose descendants are to be matched.
+ *  @param ancestorMatcher A matcher that's run against the ancestors of the UI element being
+ *                         matched.
  *
- *  @return A matcher to check if a UI element is the descendant of another.
+ *  @return A matcher to check if a specified element has an ancestor that matches
+ *          @c ancestorMatcher.
  */
 + (id<GREYMatcher>)matcherForAncestor:(id<GREYMatcher>)ancestorMatcher;
 
 /**
- *  Matcher that matches any UI element with a descendant matching the given matcher.
+ *  Matcher that matches any UI element with a descendant matching the given @c descendantMatcher.
  *
- *  @param descendantMatcher A matcher being checked to be a descendant
- *                           of the UI element being checked.
+ *  @param descendantMatcher A matcher that's run against the descendants of the UI element being
+ *                           matched.
  *
- *  @return A matcher to check if a the specified element is in a descendant of another UI element.
+ *  @return A matcher to check if a specified element has a descendant that matches
+ *          @c descendantMatcher.
  */
 + (id<GREYMatcher>)matcherForDescendant:(id<GREYMatcher>)descendantMatcher;
 
@@ -268,16 +269,6 @@ NS_ASSUME_NONNULL_BEGIN
 + (id<GREYMatcher>)matcherForSliderValueMatcher:(id<GREYMatcher>)valueMatcher;
 
 /**
- *  Matcher that matches UIPickerView that has a column set to @c value.
- *
- *  @param column The column of the UIPickerView to be matched.
- *  @param value  The value that should be set in the column of the UIPickerView.
- *
- *  @return A matcher to check the value in a particular column of a UIPickerView.
- */
-+ (id<GREYMatcher>)matcherForPickerColumn:(NSInteger)column setToValue:(NSString *)value;
-
-/**
  *  Matcher that matches UIDatePicker that is set to @c value.
  *
  *  @param value The date value that should be present in the UIDatePicker
@@ -285,6 +276,17 @@ NS_ASSUME_NONNULL_BEGIN
  *  @return A matcher for a date in a UIDatePicker.
  */
 + (id<GREYMatcher>)matcherForDatePickerValue:(NSDate *)value;
+
+/**
+ *  Matcher that matches UIPickerView that has a column set to @c value.
+ *
+ *  @param column The column of the UIPickerView to be matched.
+ *  @param value  The value that should be set in the column of the UIPickerView.
+ *
+ *  @return A matcher to check the value in a particular column of a UIPickerView.
+ */
++ (id<GREYMatcher>)matcherForPickerColumn:(NSInteger)column
+                               setToValue:(nullable NSString *)value;
 
 /**
  *  Matcher that verifies whether an element, that is a UIControl, is enabled.
@@ -322,10 +324,15 @@ NS_ASSUME_NONNULL_BEGIN
  *  @param constraints             The constraints to be matched.
  *  @param referenceElementMatcher The reference element with the correct constraints.
  *
+ *  @remark Constraints are often represented using floating point numbers. Floating point
+ *          arithmetic can often induce errors based on the way the numbers are represented in
+ *          hardware; hence, floating point comparisons use a margin value
+ *          @c kGREYAcceptableFloatDifference that is used for adding accuracy to such arithmetic.
+ *
  *  @return A matcher to verify the GREYLayoutConstraints on a UI element.
  */
 + (id<GREYMatcher>)matcherForConstraints:(NSArray *)constraints
-            toReferenceElementMatching:(id<GREYMatcher>)referenceElementMatcher;
+              toReferenceElementMatching:(id<GREYMatcher>)referenceElementMatcher;
 
 /**
  *  Matcher primarily for asserting that the element is @c nil or not found.
@@ -413,6 +420,15 @@ NS_ASSUME_NONNULL_BEGIN
  */
 + (id<GREYMatcher>)matcherForScrolledToContentEdge:(GREYContentEdge)edge;
 
+/**
+ *  Matcher that matches a UITextField's content.
+ *
+ *  @param value The text string contained inside the UITextField.
+ *
+ *  @return A matcher that matches the value inside a UITextField.
+ */
++ (id<GREYMatcher>)matcherForTextFieldValue:(NSString *)value;
+
 @end
 
 #if !(GREY_DISABLE_SHORTHAND)
@@ -492,11 +508,12 @@ GREY_EXPORT id<GREYMatcher> grey_stepperValue(double value);
 /** Shorthand for GREYMatchers::matcherForSliderValueMatcher:. */
 GREY_EXPORT id<GREYMatcher> grey_sliderValueMatcher(id<GREYMatcher> valueMatcher);
 
-/** Shorthand for GREYMatchers::matcherForPickerColumn:setToValue:. */
-GREY_EXPORT id<GREYMatcher> grey_pickerColumnSetToValue(NSInteger column, NSString *value);
-
 /** Shorthand for GREYMatchers::matcherForDatePickerValue:. */
 GREY_EXPORT id<GREYMatcher> grey_datePickerValue(NSDate *date);
+
+/** Shorthand for GREYMatchers::matcherForPickerColumn:setToValue:. */
+GREY_EXPORT id<GREYMatcher> grey_pickerColumnSetToValue(NSInteger column,
+                                                        NSString * _Nullable value);
 
 /** Shorthand for GREYMatchers::matcherForEnabledElement. */
 GREY_EXPORT id<GREYMatcher> grey_enabled(void);
@@ -537,6 +554,9 @@ GREY_EXPORT id<GREYMatcher> grey_greaterThan(id value);
 
 /** Shorthand for GREYMatchers::matcherForScrolledToContentEdge:. */
 GREY_EXPORT id<GREYMatcher> grey_scrolledToContentEdge(GREYContentEdge edge);
+
+/** Shorthand for GREYMatchers::matcherForTextFieldValue:. */
+GREY_EXPORT id<GREYMatcher> grey_textFieldValue(NSString *value);
 
 #endif // GREY_DISABLE_SHORTHAND
 
