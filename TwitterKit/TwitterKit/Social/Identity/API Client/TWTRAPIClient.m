@@ -213,7 +213,7 @@ static id<TWTRSessionStore_Private> TWTRSharedSessionStore = nil;
                 return;
             } else if (imageData.length > imageMaxFileSize) {
                 NSLog(@"Error: image data is too big");
-                NSError *sizeError = [NSError errorWithDomain:TWTRErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey: @"Error: image data is bigger than 5 MB"}];
+                NSError *sizeError = [NSError errorWithDomain:TWTRErrorDomain code:0 userInfo:@{NSLocalizedDescriptionKey: @"Error: image data is bigger than 15 MB"}];
                 completion(nil, sizeError);
                 return;
             }
