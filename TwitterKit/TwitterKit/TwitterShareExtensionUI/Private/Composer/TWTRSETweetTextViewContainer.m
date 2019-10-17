@@ -111,6 +111,9 @@ static const UIEdgeInsets kComposeTextViewTextContainerInsets = {.top = 8, .left
         _placeholderLabel.translatesAutoresizingMaskIntoConstraints = NO;
         _characterCounterLabel.translatesAutoresizingMaskIntoConstraints = NO;
 
+        if (@available(iOS 13.0, *)) {
+            [self _tseui_updateLineCount];
+        }
         [self setNeedsUpdateConstraints];
     }
 
