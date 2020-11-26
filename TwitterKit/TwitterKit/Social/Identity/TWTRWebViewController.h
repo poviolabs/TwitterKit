@@ -23,7 +23,7 @@
 
 @class TWTRWebViewController;
 
-typedef BOOL (^TWTRWebViewControllerShouldLoadCompletion)(UIViewController *controller, NSURLRequest *request, UIWebViewNavigationType navigationType);
+typedef BOOL (^TWTRWebViewControllerShouldLoadCompletion)(UIViewController *controller, NSURLRequest *request);
 typedef void (^TWTRWebViewControllerCancelCompletion)(TWTRWebViewController *webViewController);
 typedef void (^TWTRWebViewControllerHandleError)(NSError *error);
 
