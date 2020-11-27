@@ -383,6 +383,8 @@
 		92B9AC9119DF359D00E8BC68 /* UserWithEmailResponse.json in Resources */ = {isa = PBXBuildFile; fileRef = 92B9AC9019DF359D00E8BC68 /* UserWithEmailResponse.json */; };
 		92B9AC9319DF388E00E8BC68 /* UserWithEmptyEmailResponse.json in Resources */ = {isa = PBXBuildFile; fileRef = 92B9AC9219DF388E00E8BC68 /* UserWithEmptyEmailResponse.json */; };
 		92B9AC9519DF392E00E8BC68 /* UserWithNullEmailResponse.json in Resources */ = {isa = PBXBuildFile; fileRef = 92B9AC9419DF392E00E8BC68 /* UserWithNullEmailResponse.json */; };
+		990BF4862570EAA200F092AD /* CoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 990BF4832570EAA200F092AD /* CoreServices.framework */; };
+		990BF49A2570ECAC00F092AD /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 990BF4992570ECAC00F092AD /* WebKit.framework */; };
 		9D0AE5A91AC7359D00884B45 /* TWTRDateFormatter.h in Headers */ = {isa = PBXBuildFile; fileRef = 9D0AE5A71AC7359D00884B45 /* TWTRDateFormatter.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		9D0AE5AA1AC7359D00884B45 /* TWTRDateFormatter.m in Sources */ = {isa = PBXBuildFile; fileRef = 9D0AE5A81AC7359D00884B45 /* TWTRDateFormatter.m */; };
 		9D0AE5AC1AC736C300884B45 /* TWTRDateFormatterTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 9D0AE5AB1AC736C300884B45 /* TWTRDateFormatterTests.m */; };
@@ -405,7 +407,6 @@
 		A9A7FF0E18E4AAA8008334E6 /* TWTRTwitter.h in Headers */ = {isa = PBXBuildFile; fileRef = A9A7FF0C18E4AAA8008334E6 /* TWTRTwitter.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		A9A7FF0F18E4AAA8008334E6 /* TWTRTwitter.m in Sources */ = {isa = PBXBuildFile; fileRef = A9A7FF0D18E4AAA8008334E6 /* TWTRTwitter.m */; };
 		A9A955B919903E5E0074867E /* TWTRTwitter_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = A9A955B819903E5E0074867E /* TWTRTwitter_Private.h */; };
-		AA3E099220119CC000792255 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA3E099120119CA500792255 /* MobileCoreServices.framework */; };
 		AA3E099920125E9100792255 /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AAF0C9EE20119BB40057F438 /* CoreLocation.framework */; };
 		AA3E099A20125EBC00792255 /* MobileCoreServices.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA3E099120119CA500792255 /* MobileCoreServices.framework */; };
 		AA3E099C20125EC600792255 /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AA3E099B20125EC600792255 /* MapKit.framework */; };
@@ -1111,6 +1112,8 @@
 		92B9AC9019DF359D00E8BC68 /* UserWithEmailResponse.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; lineEnding = 0; path = UserWithEmailResponse.json; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.javascript; };
 		92B9AC9219DF388E00E8BC68 /* UserWithEmptyEmailResponse.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; lineEnding = 0; path = UserWithEmptyEmailResponse.json; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.javascript; };
 		92B9AC9419DF392E00E8BC68 /* UserWithNullEmailResponse.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; lineEnding = 0; path = UserWithNullEmailResponse.json; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.javascript; };
+		990BF4832570EAA200F092AD /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = System/Library/Frameworks/CoreServices.framework; sourceTree = SDKROOT; };
+		990BF4992570ECAC00F092AD /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/iOSSupport/System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
 		9D0AE5A71AC7359D00884B45 /* TWTRDateFormatter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TWTRDateFormatter.h; sourceTree = "<group>"; };
 		9D0AE5A81AC7359D00884B45 /* TWTRDateFormatter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TWTRDateFormatter.m; sourceTree = "<group>"; };
 		9D0AE5AB1AC736C300884B45 /* TWTRDateFormatterTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TWTRDateFormatterTests.m; sourceTree = "<group>"; };
@@ -1396,9 +1399,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				AA3E099220119CC000792255 /* MobileCoreServices.framework in Frameworks */,
 				AAF0C9F220119C2C0057F438 /* MapKit.framework in Frameworks */,
 				8645238B234B69790021E8CD /* ImageIO.framework in Frameworks */,
+				990BF4862570EAA200F092AD /* CoreServices.framework in Frameworks */,
 				AAF0C9F120119C0A0057F438 /* CoreLocation.framework in Frameworks */,
 				37ED04661CE3E81C003DC129 /* SafariServices.framework in Frameworks */,
 				DB2242801C3F24AF008A6DC7 /* Security.framework in Frameworks */,
@@ -1413,6 +1416,7 @@
 				DB2242661C3F2188008A6DC7 /* CoreGraphics.framework in Frameworks */,
 				DB2242611C3F2181008A6DC7 /* CoreData.framework in Frameworks */,
 				DB22427F1C3F24A2008A6DC7 /* libTwitterCore.a in Frameworks */,
+				990BF49A2570ECAC00F092AD /* WebKit.framework in Frameworks */,
 				BFE839801ADF237A0035CBA1 /* libTwitterKit.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1423,6 +1427,8 @@
 		208ACAB41FB2800900008F42 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				990BF4992570ECAC00F092AD /* WebKit.framework */,
+				990BF4832570EAA200F092AD /* CoreServices.framework */,
 				86452388234B69790021E8CD /* ImageIO.framework */,
 				AA3E099B20125EC600792255 /* MapKit.framework */,
 				AA3E099120119CA500792255 /* MobileCoreServices.framework */,
@@ -3618,6 +3624,10 @@
 				BITCODE_GENERATION_MODE = bitcode;
 				CODE_SIGN_IDENTITY = "";
 				ENABLE_BITCODE = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SDKROOT)/System/iOSSupport/System/Library/Frameworks",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -3636,6 +3646,10 @@
 				BITCODE_GENERATION_MODE = bitcode;
 				CODE_SIGN_IDENTITY = "";
 				ENABLE_BITCODE = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SDKROOT)/System/iOSSupport/System/Library/Frameworks",
+				);
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
